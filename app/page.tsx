@@ -3,43 +3,43 @@ import ProductCard from "./components/ProductCard";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
-// डमी प्रोडक्ट डेटा
+// Dummy product data
 const featuredProducts = [
   {
     id: "1",
-    name: "पुरुषों की शर्ट",
+    name: "Men's Shirt",
     price: 899,
     image: "https://placehold.co/400x600/2563eb/white?text=Shirt",
-    category: "पुरुष"
+    category: "Men"
   },
   {
     id: "2",
-    name: "महिलाओं की साड़ी",
+    name: "Women's Saree",
     price: 1499,
     image: "https://placehold.co/400x600/7c3aed/white?text=Saree",
-    category: "महिला"
+    category: "Women"
   },
   {
     id: "3",
-    name: "बच्चों का सूट",
+    name: "Kids Suit",
     price: 699,
     image: "https://placehold.co/400x600/10b981/white?text=Kids+Suit",
-    category: "बच्चे"
+    category: "Kids"
   },
   {
     id: "4",
-    name: "जींस पैंट",
+    name: "Jeans Pants",
     price: 999,
     image: "https://placehold.co/400x600/1e40af/white?text=Jeans",
-    category: "पुरुष"
+    category: "Men"
   },
 ];
 
-// श्रेणियां
+// Categories
 const categories = [
-  { name: "पुरुष", image: "https://placehold.co/400x300/2563eb/white?text=Men", link: "/products?category=men" },
-  { name: "महिला", image: "https://placehold.co/400x300/7c3aed/white?text=Women", link: "/products?category=women" },
-  { name: "बच्चे", image: "https://placehold.co/400x300/10b981/white?text=Kids", link: "/products?category=kids" },
+  { name: "Men", image: "https://placehold.co/400x300/2563eb/white?text=Men", link: "/products?category=men" },
+  { name: "Women", image: "https://placehold.co/400x300/7c3aed/white?text=Women", link: "/products?category=women" },
+  { name: "Kids", image: "https://placehold.co/400x300/10b981/white?text=Kids", link: "/products?category=kids" },
 ];
 
 export default function Home() {
@@ -52,14 +52,14 @@ export default function Home() {
         <div className="relative h-full flex items-center justify-center text-center px-4">
           <div className="max-w-4xl">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              मा बाबा क्लॉथ स्टोर में आपका स्वागत है
+              Welcome to Ma Baba Cloth Store
             </h1>
             <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
-              गांव का सबसे विश्वसनीय कपड़े का स्टोर, जहां आप खुद आकर अपनी पसंद का सामान चुन सकते हैं
+              Your most trusted clothing store in town, where you can visit and choose your favorite items in person
             </p>
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg inline-block">
               <p className="text-yellow-300 text-lg mb-4">
-                🏪 केवल स्टोर से खरीदारी | होम डिलीवरी उपलब्ध नहीं
+                🏪 In-Store Shopping Only | No Home Delivery Available
               </p>
               <Link 
                 href="/products" 
@@ -68,7 +68,7 @@ export default function Home() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
-                स्टोर पर जाएं
+                Visit Store
               </Link>
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function Home() {
       {/* श्रेणियां सेक्शन */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">श्रेणियां</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Categories</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {categories.map((category, index) => (
               <Link key={index} href={category.link} className="group">
@@ -97,7 +97,7 @@ export default function Home() {
       {/* फीचर्ड प्रोडक्ट्स सेक्शन */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">फीचर्ड प्रोडक्ट्स</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredProducts.map((product) => (
               <ProductCard 

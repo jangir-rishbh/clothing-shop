@@ -12,31 +12,23 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-bold text-white hover:text-gray-200 transition-colors">
-              मा बाबा क्लॉथ स्टोर
+Ma Baba Cloth Store
             </Link>
           </div>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <Link href="/" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              होम
+              Home
             </Link>
             <Link href="/products" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              प्रोडक्ट्स
+              Products
             </Link>
             <Link href="/about" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              हमारे बारे में
+              About Us
             </Link>
             <Link href="/contact" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              संपर्क करें
-            </Link>
-            <Link href="/cart" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              <span className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span className="absolute -top-2 -right-2 bg-purple-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">0</span>
-              </span>
+              Contact
             </Link>
           </div>
           
@@ -73,19 +65,16 @@ export default function Navbar() {
       <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden bg-gradient-to-b from-purple-700 to-indigo-800`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           <Link href="/" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            होम
+            Home
           </Link>
           <Link href="/products" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            प्रोडक्ट्स
+            Products
           </Link>
           <Link href="/about" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            हमारे बारे में
+            About Us
           </Link>
           <Link href="/contact" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            संपर्क करें
-          </Link>
-          <Link href="/cart" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            कार्ट
+            Contact
           </Link>
         </div>
       </div>
