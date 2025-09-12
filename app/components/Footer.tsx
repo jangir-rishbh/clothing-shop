@@ -6,7 +6,15 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">Ma Baba Cloth Store</h3>
+            <div className="mb-6">
+              <div className="text-3xl font-serif italic font-bold text-white mb-1">
+                <span className="relative">
+                  <span className="text-yellow-400">Ma</span> <span className="text-white">Baba</span>
+                </span>
+              </div>
+              <div className="text-sm font-sans tracking-widest text-gray-300 uppercase">Elegant Clothing & Fashion</div>
+              <div className="w-16 h-0.5 bg-yellow-400 mt-3 mb-4"></div>
+            </div>
             <p className="text-gray-300">
               We have all types of clothing available. We guarantee quality and affordable prices.
             </p>
@@ -28,7 +36,12 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 text-center">
-          <p className="text-gray-300">&copy; {new Date().getFullYear()} Ma Baba Cloth Store. All rights reserved.</p>
+          <p className="text-gray-300">&copy; {new Date().getFullYear()} 
+            <span className="font-serif italic">
+              <span className="text-yellow-400">Ma Baba</span>
+              <span className="text-white"> Cloth Store</span>
+            </span>. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
