@@ -50,16 +50,27 @@ export default function Home() {
       <section className="relative h-[70vh] bg-gray-900">
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative h-full flex items-center justify-center text-center px-4">
-          <div>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+          <div className="max-w-4xl">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               मा बाबा क्लॉथ स्टोर में आपका स्वागत है
             </h1>
-            <p className="text-xl text-white mb-8">
-              सभी प्रकार के कपड़े एक ही जगह पर उपलब्ध
+            <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
+              गांव का सबसे विश्वसनीय कपड़े का स्टोर, जहां आप खुद आकर अपनी पसंद का सामान चुन सकते हैं
             </p>
-            <Link href="/products" className="bg-purple-600 text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-purple-700 transition-colors">
-              अभी खरीदें
-            </Link>
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg inline-block">
+              <p className="text-yellow-300 text-lg mb-4">
+                🏪 केवल स्टोर से खरीदारी | होम डिलीवरी उपलब्ध नहीं
+              </p>
+              <Link 
+                href="/products" 
+                className="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-md text-lg font-medium transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                स्टोर पर जाएं
+              </Link>
+            </div>
           </div>
         </div>
       </section>
