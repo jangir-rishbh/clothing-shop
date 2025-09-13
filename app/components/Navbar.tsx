@@ -2,16 +2,24 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // You'll need to manage this state properly
+  const { session, signOut, loading } = useAuth();
+  const router = useRouter();
 
-  const handleLogout = () => {
-    // Handle logout logic here
-    setIsLoggedIn(false);
-    setIsUserMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/home');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    } finally {
+      setIsUserMenuOpen(false);
+    }
   };
 
   return (
@@ -45,61 +53,148 @@ export default function Navbar() {
               Contact
             </Link>
             
-            {isLoggedIn ? (
-              <div className="relative ml-4">
-                <button 
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                >
-                  <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-purple-600 font-bold">
-                    U
-                  </div>
-                </button>
-                
-                {isUserMenuOpen && (
-                  <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                    <div className="py-1" role="menu" aria-orientation="vertical">
+            {!loading && (
+              session ? (
+                <div className="relative ml-4">
+                  <button 
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white"
+                  >
+                    <span className="sr-only">Open user menu</span>
+                    <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold">
+                      {session.user?.email?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                  </button>
+
+                  {isUserMenuOpen && (
+                    <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                       <Link 
                         href="/profile" 
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         Your Profile
                       </Link>
-                      <Link 
-                        href="/orders" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                      >
-                        Your Orders
-                      </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Link 
+                    href="/login" 
+                    className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push('/login?signup=true');
+                    }}
+                    className="px-4 py-2 bg-white text-purple-600 rounded-md hover:bg-gray-100 transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )
+            )}
+          </div>
+          
+          {/* Mobile menu */}
+          <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <Link
+                href="/home"
+                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                href="/products"
+                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Products
+              </Link>
+              <Link
+                href="/about"
+                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About Us
+              </Link>
+              <Link
+                href="/contact"
+                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              
+              {!loading && (
+                session ? (
+                  <div className="pt-4 pb-3 border-t border-white/20 mt-4">
+                    <div className="flex items-center px-5">
+                      <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold">
+                        {session.user?.email?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                      <div className="ml-3">
+                        <div className="text-base font-medium text-white">
+                          {session.user?.email}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 px-2 space-y-1">
+                      <Link
+                        href="/profile"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Your Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
                       >
                         Sign out
                       </button>
                     </div>
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2 ml-4">
-                <Link 
-                  href="/login" 
-                  className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
-                >
-                  Log in
-                </Link>
-                <Link 
-                  href="/login" 
-                  className="px-4 py-2 bg-white text-purple-600 rounded-md hover:bg-gray-100 transition-colors font-medium"
-                >
-                  Sign up
-                </Link>
-              </div>
-            )}
+                ) : (
+                  <div className="pt-4 pb-3 border-t border-white/20 mt-4 space-y-2">
+                    <Link
+                      href="/login"
+                      className="block w-full px-4 py-2 text-center text-base font-medium text-white hover:bg-white/10 rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/login"
+                      className="block w-full px-4 py-2 text-center text-base font-medium text-purple-600 bg-white rounded-md hover:bg-gray-100"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIsMenuOpen(false);
+                        router.push('/login?signup=true');
+                      }}
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )
+              )}
+            </div>
           </div>
           
           {/* Mobile menu button */}
@@ -129,59 +224,7 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-      </div>
-      
-      {/* Mobile menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden bg-gradient-to-b from-purple-700 to-indigo-800`}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <Link href="/home" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            Home
-          </Link>
-          <Link href="/products" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            Products
-          </Link>
-          <Link href="/about" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            About Us
-          </Link>
-          <Link href="/contact" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-            Contact
-          </Link>
-          
-          {isLoggedIn ? (
-            <>
-              <div className="border-t border-white/20 pt-2">
-                <Link href="/profile" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-                  Your Profile
-                </Link>
-                <Link href="/orders" className="block px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors">
-                  Your Orders
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 text-white hover:bg-white/10 rounded-md transition-colors"
-                >
-                  Sign out
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="pt-2 border-t border-white/20">
-              <Link 
-                href="/login" 
-                className="block w-full text-center px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors mb-2"
-              >
-                Log in
-              </Link>
-              <Link 
-                href="/login?mode=signup" 
-                className="block w-full text-center px-4 py-2 bg-white text-purple-600 rounded-md hover:bg-gray-100 transition-colors font-medium"
-              >
-                Sign up
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </nav>
-  );
+    </div>
+  </nav>
+);
 }
