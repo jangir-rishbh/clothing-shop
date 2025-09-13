@@ -1,4 +1,9 @@
+'use client';
+
 import Link from "next/link";
+import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useSearchParams } from "next/navigation";
 import ProductCard from "../components/ProductCard";
 
 // Dummy product data
@@ -41,6 +46,21 @@ const categories = [
 ];
 
 export default function HomePage() {
+  const { session, loading } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectedFrom = searchParams.get('redirectedFrom');
+
+  useEffect(() => {
+    if (redirectedFrom) {
+      // Show a toast or message that the user needs to log in
+      console.log(`Please log in to access ${redirectedFrom}`);
+      // Remove the redirectedFrom parameter from the URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('redirectedFrom');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [redirectedFrom]);
+
   return (
     <div>
       {/* Hero Section */}
@@ -48,6 +68,11 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative h-full flex items-center justify-center text-center px-4">
           <div className="max-w-4xl">
+            {redirectedFrom && (
+              <div className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-lg">
+                Please log in to access {redirectedFrom}
+              </div>
+            )}
             <div className="text-center">
               <div className="inline-block text-left">
                 <h1 className="text-5xl md:text-7xl font-serif italic font-bold text-white mb-4">

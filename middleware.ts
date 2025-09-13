@@ -1,13 +1,39 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Define public routes that don't require authentication
+const publicRoutes = [
+  '/',
+  '/home',
+  '/about',
+  '/contact',
+  '/products',
+  '/login',
+  '/signup'
+]
+
 export async function middleware(request: NextRequest) {
+  // Create a response object
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
+  const { pathname } = request.nextUrl
+  
+  // Skip middleware for public routes
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
+    // If user is logged in and tries to access login/signup, redirect to home
+    if ((pathname === '/login' || pathname === '/signup') && request.cookies.get('sb:token')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/home'
+      return NextResponse.redirect(url)
+    }
+    return response
+  }
+
+  // Initialize Supabase client
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -54,17 +80,23 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // Check if user is authenticated
   const { data: { session } } = await supabase.auth.getSession()
-  
-  // If user is not signed in and the current path is not /login, redirect to /login
-  if (!session && !request.nextUrl.pathname.startsWith('/login')) {
-    return NextResponse.redirect(new URL('/login', request.url))
+
+  // If no session and trying to access protected route, redirect to login
+  if (!session && !publicRoutes.some(route => pathname.startsWith(route))) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('redirectedFrom', pathname)
+    return NextResponse.redirect(url)
   }
 
-  // If user is signed in and the current path is /login, redirect to /home
-  if (session && request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/home', request.url))
+  // If user is authenticated, set the session in the response
+  if (session) {
+    response.headers.set('x-supabase-auth', 'true')
   }
+
+  return response
 
   return response
 }
@@ -76,8 +108,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - api (API routes)
+     * - public (public files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|public).*)',
   ],
 }

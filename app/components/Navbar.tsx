@@ -1,20 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { session, signOut, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   const handleLogout = async () => {
     try {
       await signOut();
-      router.push('/home');
+      window.location.href = '/home';
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {
@@ -22,12 +28,20 @@ export default function Navbar() {
     }
   };
 
+  // Navigation items
+  const navItems = [
+    { name: 'Home', href: '/home' },
+    { name: 'Products', href: '/products' },
+    { name: 'About Us', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+  ];
+
   return (
     <nav className="bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="group relative">
+            <Link href="/home" className="group relative">
               <span className="text-2xl md:text-3xl font-serif italic font-bold text-gray-800">
                 <span className="relative">
                   <span className="text-yellow-500">Ma Baba</span>
@@ -39,19 +53,20 @@ export default function Navbar() {
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link href="/home" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              Home
-            </Link>
-            <Link href="/products" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              Products
-            </Link>
-            <Link href="/about" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              About Us
-            </Link>
-            <Link href="/contact" className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors">
-              Contact
-            </Link>
+          <div className="hidden md:flex items-center space-x-1">
+            {navItems.map((item) => (
+              <Link 
+                key={item.href}
+                href={item.href}
+                className={`px-4 py-2 rounded-md transition-colors ${
+                  pathname === item.href 
+                    ? 'bg-white/20 text-white' 
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
             
             {!loading && (
               session ? (

@@ -1,20 +1,33 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, signUp } = useAuth();
+  const searchParams = useSearchParams();
+  const { signIn, signUp, session } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: ''
   });
+
+  // Check if user is already logged in
+  useEffect(() => {
+    if (session) {
+      router.push('/home');
+    }
+  }, [session, router]);
+
+  // Check for redirect URL
+  const redirectTo = searchParams.get('redirectedFrom') || '/home';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,28 +41,45 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       if (isLogin) {
         // Sign in
         const { error } = await signIn(formData.email, formData.password);
         if (error) throw error;
-        router.push('/home');
+        router.push(redirectTo);
       } else {
         // Sign up
-        if (!formData.name) {
+        if (!formData.name.trim()) {
           throw new Error('Name is required');
         }
-        const { error } = await signUp(formData.email, formData.password, formData.name);
+        if (formData.password.length < 6) {
+          throw new Error('Password must be at least 6 characters long');
+        }
+        const { error } = await signUp(formData.email, formData.password, formData.name.trim());
         if (error) throw error;
         
-        // Redirect to home after successful sign up
-        router.push('/home');
+        // Show success message and switch to login
+        setSuccess('Registration successful! Please log in.');
+        setIsLogin(true);
+        setFormData(prev => ({ ...prev, password: '' })); // Clear password field
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       console.error('Authentication error:', error);
-      setError(errorMessage);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      
+      // Handle common auth errors
+      if (errorMessage.includes('Invalid login credentials')) {
+        setError('Invalid email or password');
+      } else if (errorMessage.includes('Email not confirmed')) {
+        setError('Please verify your email before logging in');
+      } else if (errorMessage.includes('already registered')) {
+        setError('This email is already registered. Please log in instead.');
+        setIsLogin(true);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -57,75 +87,105 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
             {isLogin ? 'Sign in to your account' : 'Create a new account'}
           </h2>
-          {error && (
-            <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
-              <span className="block sm:inline">{error}</span>
-            </div>
-          )}
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="font-medium text-purple-600 hover:text-purple-500"
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError(null);
+                setSuccess(null);
+              }}
+              className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
             >
-              {isLogin ? 'create a new account' : 'sign in to existing account'}
+              {isLogin ? 'Sign up' : 'Sign in'}
             </button>
           </p>
         </div>
+
+        {error && (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-red-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {success && (
+          <div className="rounded-md bg-green-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">{success}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             {!isLogin && (
               <div>
-                <label htmlFor="name" className="sr-only">
-                  Full Name
-                </label>
+                <label htmlFor="name" className="sr-only">Full Name</label>
                 <input
                   id="name"
                   name="name"
                   type="text"
                   required={!isLogin}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="Full name"
                   value={formData.name}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </div>
             )}
+
             <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
+              <label htmlFor="email-address" className="sr-only">Email address</label>
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${!isLogin ? 'rounded-t-none' : 'rounded-t-md'} border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
                 placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
+
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                minLength={isLogin ? 0 : 6}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-t-0 border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder={isLogin ? 'Password' : 'Password (min 6 characters)'}
                 value={formData.password}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
           </div>
@@ -137,7 +197,7 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Remember me
@@ -145,9 +205,9 @@ export default function LoginPage() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
-                  Forgot your password?
-                </a>
+                <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Forgot password?
+                </Link>
               </div>
             </div>
           )}
@@ -156,7 +216,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
             >
               {loading ? (
                 <>
@@ -164,7 +224,7 @@ export default function LoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Processing...
+                  {isLogin ? 'Signing in...' : 'Creating account...'}
                 </>
               ) : isLogin ? (
                 'Sign in'
