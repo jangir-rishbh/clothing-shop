@@ -5,6 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
+type FormData = {
+  email: string;
+  password: string;
+  name: string;
+  otp: string;
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -13,11 +20,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
-    name: ''
+    name: '',
+    otp: ''
   });
+  const [showOtpField, setShowOtpField] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -37,6 +47,46 @@ export default function LoginPage() {
     }));
   };
 
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      if (!formData.email) {
+        throw new Error('Email is required');
+      }
+
+      // Send OTP to email
+      console.log('Sending OTP request for email:', formData.email);
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+      console.log('OTP response:', { status: response.status, data });
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send OTP');
+      }
+
+      setShowOtpField(true);
+      setOtpSent(true);
+      setSuccess('OTP has been sent to your email');
+    } catch (error: unknown) {
+      console.error('Error in handleSendOtp:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send OTP';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -50,26 +100,50 @@ export default function LoginPage() {
         if (error) throw error;
         router.push(redirectTo);
       } else {
-        // Sign up
+        if (!otpSent) {
+          await handleSendOtp(e);
+          return;
+        }
+
+        // Verify OTP before proceeding with signup
+        const verifyResponse = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            otp: formData.otp,
+          }),
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (!verifyResponse.ok) {
+          throw new Error(verifyData.error || 'Failed to verify OTP');
+        }
+
+        // OTP verified, proceed with signup
         if (!formData.name.trim()) {
           throw new Error('Name is required');
         }
         if (formData.password.length < 6) {
           throw new Error('Password must be at least 6 characters long');
         }
+        
         const { error } = await signUp(formData.email, formData.password, formData.name.trim());
         if (error) throw error;
         
-        // Show success message and switch to login
         setSuccess('Registration successful! Please log in.');
         setIsLogin(true);
-        setFormData(prev => ({ ...prev, password: '' })); // Clear password field
+        setFormData(prev => ({ ...prev, password: '', otp: '' }));
+        setShowOtpField(false);
+        setOtpSent(false);
       }
     } catch (error: unknown) {
       console.error('Authentication error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       
-      // Handle common auth errors
       if (errorMessage.includes('Invalid login credentials')) {
         setError('Invalid email or password');
       } else if (errorMessage.includes('Email not confirmed')) {
@@ -137,7 +211,8 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <input type="hidden" name="remember" value="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             {!isLogin && (
               <div>
@@ -147,15 +222,14 @@ export default function LoginPage() {
                   name="name"
                   type="text"
                   required={!isLogin}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Full name"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Full Name"
                   value={formData.name}
                   onChange={handleChange}
-                  disabled={loading}
+                  disabled={otpSent}
                 />
               </div>
             )}
-
             <div>
               <label htmlFor="email-address" className="sr-only">Email address</label>
               <input
@@ -164,14 +238,30 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${!isLogin ? 'rounded-t-none' : 'rounded-t-md'} border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}
-                disabled={loading}
+                disabled={otpSent}
               />
             </div>
-
+            {!isLogin && showOtpField && (
+              <div>
+                <label htmlFor="otp" className="sr-only">OTP</label>
+                <input
+                  id="otp"
+                  name="otp"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Enter 6-digit OTP"
+                  value={formData.otp}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
             <div>
               <label htmlFor="password" className="sr-only">Password</label>
               <input
@@ -180,56 +270,47 @@ export default function LoginPage() {
                 type="password"
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
                 required
-                minLength={isLogin ? 0 : 6}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-t-0 border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder={isLogin ? 'Password' : 'Password (min 6 characters)'}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                disabled={loading}
+                disabled={!isLogin && !otpSent}
               />
             </div>
           </div>
 
-          {isLogin && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
-              </div>
-
+          {isLogin ? (
+            <div className="flex items-center justify-end">
               <div className="text-sm">
                 <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  Forgot password?
+                  Forgot your password?
                 </Link>
               </div>
             </div>
+          ) : !otpSent ? (
+            <p className="text-sm text-gray-600">
+              We&apos;ll send you a verification code to your email.
+            </p>
+          ) : (
+            <p className="text-sm text-gray-600">
+              Enter the 6-digit OTP sent to {formData.email}
+            </p>
           )}
 
-          <div>
+          <div className="space-y-2">
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  {isLogin ? 'Signing in...' : 'Creating account...'}
-                </>
+                <span>Processing...</span>
               ) : isLogin ? (
                 'Sign in'
+              ) : otpSent ? (
+                'Complete Sign Up'
               ) : (
-                'Sign up'
+                'Send OTP'
               )}
             </button>
           </div>

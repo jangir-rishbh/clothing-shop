@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email OTP Verification</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Email Verification</h1>
+    
+    <div id="send-otp-section">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+          Email Address
+        </label>
+        <input
+          type="email"
+          id="email"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          placeholder="Enter your email"
+        >
+      </div>
+      <button
+        onclick="sendOTP()"
+        class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      >
+        Send OTP
+      </button>
+    </div>
+
+    <div id="verify-otp-section" class="hidden">
+      <p class="mb-4 text-gray-600">We've sent a verification code to <span id="user-email" class="font-semibold"></span></p>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="otp">
+          Enter Verification Code
+        </label>
+        <input
+          type="text"
+          id="otp"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          placeholder="Enter 6-digit OTP"
+          maxlength="6"
+        >
+      </div>
+      <button
+        onclick="verifyOTP()"
+        class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-2"
+      >
+        Verify OTP
+      </button>
+      <button
+        onclick="resetForm()"
+        class="w-full text-blue-500 hover:text-blue-700 font-medium py-2"
+      >
+        Change Email
+      </button>
+    </div>
+
+    <div id="success-message" class="hidden text-center py-4">
+      <div class="text-green-500 font-bold mb-2">Email verified successfully!</div>
+      <p>You can now proceed to your account.</p>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
