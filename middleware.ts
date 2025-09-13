@@ -9,7 +9,9 @@ const publicRoutes = [
   '/contact',
   '/products',
   '/login',
-  '/signup'
+  '/signup',
+  '/_next',
+  '/favicon.ico'
 ]
 
 export async function middleware(request: NextRequest) {
@@ -22,10 +24,15 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   
-  // Skip middleware for public routes
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  // Skip middleware for public routes and static files
+  if (publicRoutes.some(route => 
+    pathname === route || 
+    pathname.startsWith(`${route}/`) ||
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/favicon.ico')
+  )) {
     // If user is logged in and tries to access login/signup, redirect to home
-    if ((pathname === '/login' || pathname === '/signup') && request.cookies.get('sb:token')) {
+    if ((pathname === '/login' || pathname === '/signup') && request.cookies.has('sb-access-token')) {
       const url = request.nextUrl.clone()
       url.pathname = '/home'
       return NextResponse.redirect(url)
@@ -43,7 +50,8 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
+          // Set the cookie in the response
+          response.cookies.set({
             name,
             value,
             ...options,
@@ -60,7 +68,8 @@ export async function middleware(request: NextRequest) {
           })
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
+          // Remove the cookie from the response
+          response.cookies.set({
             name,
             value: '',
             ...options,

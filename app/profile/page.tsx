@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ProfilePage() {
-  const { session, loading } = useAuth();
+  const { session, loading, supabase } = useAuth();
   const router = useRouter();
   const [formData, setFormData] = useState<{ full_name: string; email: string }>({
     full_name: '',
@@ -37,25 +37,52 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session) return;
+    if (!session) {
+      setError('Please sign in to update your profile');
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const { error } = await fetch('/api/update-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: session.user.id,
+      // First ensure we have a fresh session
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !currentSession) {
+        throw new Error('Session expired. Please sign in again.');
+      }
+      
+      // Update the user's metadata directly through Supabase client
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { full_name: formData.full_name }
+      });
+      
+      if (updateError) throw updateError;
+      
+      // Update the profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: currentSession.user.id,
           full_name: formData.full_name,
-        }),
-      }).then(res => res.json());
-
-      if (error) throw error;
+          updated_at: new Date().toISOString(),
+        });
+      
+      if (profileError) throw profileError;
+      
+      // Refresh the session to get the latest data
+      const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) throw refreshError;
+      if (!newSession) throw new Error('Failed to refresh session');
+      
+      // Update the form data with the latest values
+      setFormData({
+        full_name: newSession.user.user_metadata?.full_name || formData.full_name,
+        email: newSession.user.email || '',
+      });
       
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
