@@ -38,17 +38,17 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between h-16 md:h-20">
           <div className="flex items-center">
-            <Link href="/home" className="group relative">
-              <span className="text-2xl md:text-3xl font-serif italic font-bold text-gray-800">
-                <span className="relative">
+            <Link href="/home" className="group relative flex-shrink-0">
+              <div className="flex flex-col">
+                <span className="text-xl sm:text-2xl md:text-3xl font-serif italic font-bold text-gray-800 leading-tight">
                   <span className="text-yellow-500">Ma Baba</span>
-                  <span className="text-gray-800"> Cloth Store</span>
+                  <span className="text-gray-800 whitespace-nowrap"> Cloth Store</span>
                 </span>
-                <span className="block text-sm font-sans not-italic font-normal tracking-wider text-gray-600 -mt-1">Elegant Clothing & Fashion</span>
-              </span>
+                <span className="text-[10px] xs:text-xs sm:text-sm font-sans not-italic font-normal tracking-wider text-gray-600 mt-0 sm:mt-0.5">Elegant Clothing & Fashion</span>
+              </div>
             </Link>
           </div>
           
@@ -58,7 +58,7 @@ export default function Navbar() {
               <Link 
                 key={item.href}
                 href={item.href}
-                className={`px-4 py-2 rounded-md transition-colors ${
+                className={`px-3 py-2 md:px-4 md:py-2.5 rounded-md transition-colors text-sm md:text-base ${
                   pathname === item.href 
                     ? 'bg-white/20 text-white' 
                     : 'text-white hover:bg-white/10'
@@ -123,54 +123,68 @@ export default function Navbar() {
           </div>
           
           {/* Mobile menu */}
-          <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <div className={`${isMenuOpen ? 'block fixed inset-0 bg-gradient-to-b from-purple-700 to-indigo-800 z-50' : 'hidden'} md:hidden`}>
+            {/* Mobile header with back button */}
+            <div className="flex items-center justify-between px-4 py-3 bg-purple-800 border-b border-purple-600">
+              <button 
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center text-white p-2 rounded-full hover:bg-white/10"
+                aria-label="Close menu"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+              <h3 className="text-lg font-semibold text-white">Menu</h3>
+              <div className="w-10"></div> {/* Spacer for alignment */}
+            </div>
+            <div className="px-6 pt-4 pb-8 space-y-3 h-[calc(100%-64px)] overflow-y-auto">
               <Link
                 href="/home"
-                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Home
+                🏠 Home
               </Link>
               <Link
                 href="/products"
-                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Products
+                👕 Products
               </Link>
               <Link
                 href="/about"
-                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About Us
+                ℹ️ About Us
               </Link>
               <Link
                 href="/contact"
-                className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Contact
+                📞 Contact
               </Link>
               
               {!loading && (
                 session ? (
                   <div className="pt-4 pb-3 border-t border-white/20 mt-4">
-                    <div className="flex items-center px-5">
-                      <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold">
+                    <div className="flex items-center px-4">
+                      <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold text-lg">
                         {session.user?.email?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div className="ml-3">
-                        <div className="text-base font-medium text-white">
+                        <div className="text-base font-medium text-white truncate max-w-[200px]">
                           {session.user?.email}
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 px-2 space-y-1">
+                    <div className="mt-3 space-y-1">
                       <Link
                         href="/profile"
-                        className="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                        className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Your Profile
@@ -180,24 +194,24 @@ export default function Navbar() {
                           handleLogout();
                           setIsMenuOpen(false);
                         }}
-                        className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10"
+                        className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
                       >
                         Sign out
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="pt-4 pb-3 border-t border-white/20 mt-4 space-y-2">
+                  <div className="pt-4 pb-3 border-t border-white/20 mt-4 space-y-3">
                     <Link
                       href="/login"
-                      className="block w-full px-4 py-2 text-center text-base font-medium text-white hover:bg-white/10 rounded-md"
+                      className="block w-full px-4 py-3 text-center text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       href="/login"
-                      className="block w-full px-4 py-2 text-center text-base font-medium text-purple-600 bg-white rounded-md hover:bg-gray-100"
+                      className="block w-full px-4 py-3 text-center text-base font-medium text-purple-600 bg-white rounded-lg hover:bg-gray-100 transition-colors"
                       onClick={(e) => {
                         e.preventDefault();
                         setIsMenuOpen(false);
@@ -213,10 +227,11 @@ export default function Navbar() {
           </div>
           
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center ml-4">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white/20 focus:outline-none"
+              className={`inline-flex items-center justify-center p-3 rounded-full ${isMenuOpen ? 'bg-white/20' : 'bg-white/10 hover:bg-white/20'} focus:outline-none transition-colors`}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             >
               <svg
                 className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
@@ -225,7 +240,7 @@ export default function Navbar() {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
               </svg>
               <svg
                 className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}

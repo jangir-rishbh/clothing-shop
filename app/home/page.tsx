@@ -46,7 +46,7 @@ const categories = [
 ];
 
 export default function HomePage() {
-  const { session, loading } = useAuth();
+  const {} = useAuth();
   const searchParams = useSearchParams();
   const redirectedFrom = searchParams.get('redirectedFrom');
 
