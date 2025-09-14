@@ -15,8 +15,23 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
-    console.log('Received OTP request for email:', email);
+    console.log('=== Starting OTP Request ===');
+    const requestBody = await request.text();
+    console.log('Raw request body:', requestBody);
+    
+    let email, purpose;
+    try {
+      const json = JSON.parse(requestBody);
+      email = json.email;
+      purpose = json.purpose || 'verification';
+      console.log('Parsed request:', { email, purpose });
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
 
     if (!email) {
       console.error('No email provided in request');
@@ -32,20 +47,55 @@ export async function POST(request: Request) {
     expiresAt.setMinutes(expiresAt.getMinutes() + 10); // OTP valid for 10 minutes
 
     // Store OTP in the database
-    console.log('Generated OTP:', otp, 'expires at:', expiresAt);
+    const expiresAtISO = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    console.log('Storing OTP for email:', email, 'expires at:', expiresAtISO);
 
-    const { error } = await supabaseAdmin
+    // Check if an OTP already exists for this email
+    console.log('Checking for existing OTPs for email:', email);
+    const { data: existingOtp, error: fetchError } = await supabaseAdmin
       .from('otp_verifications')
-      .upsert(
-        {
-          email,
-          otp,
-          expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-        },
-        { onConflict: 'email' }
-      )
-      .select()
-      .single();
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    console.log('Existing OTP check result:', { existingOtp, fetchError });
+    
+    let data, error;
+    const otpData = {
+      email,
+      otp,
+      expires_at: expiresAtISO,
+      created_at: new Date().toISOString()
+    };
+    
+    console.log('OTP data to be used:', JSON.stringify(otpData, null, 2));
+    
+    if (existingOtp) {
+      // Update existing OTP record
+      console.log('Updating existing OTP for email:', email);
+      const result = await supabaseAdmin
+        .from('otp_verifications')
+        .update(otpData)
+        .eq('id', existingOtp.id)
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+    } else {
+      // Insert new OTP
+      console.log('Inserting new OTP for email:', email);
+      const result = await supabaseAdmin
+        .from('otp_verifications')
+        .insert(otpData)
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+    }
+
+    console.log('OTP storage result:', { data, error });
 
     if (error) {
       console.error('Error storing OTP in database:', error);
@@ -64,37 +114,34 @@ export async function POST(request: Request) {
         service: 'gmail',
         auth: {
           user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        }
-      } as const);
+          pass: process.env.SMTP_PASS,
+        },
+      });
 
-      // Check if SMTP credentials are configured
-      if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.warn('SMTP credentials are not configured. Email will not be sent.');
-        console.log('For development, use the OTP from console:', otp);
-      } else {
-        // Send email
-        const info = await transporter.sendMail({
-          from: `"${process.env.SMTP_FROM_NAME || 'Your App'}" <${process.env.SMTP_USER}>`,
-          to: email, // Using the email from request, not hardcoded
-          subject: 'Your OTP Code',
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2>Your OTP Code</h2>
-              <p>Use the following OTP to verify your email:</p>
-              <div style="background: #f4f4f4; padding: 20px; text-align: center; font-size: 24px; letter-spacing: 2px; margin: 20px 0;">
-                ${otp}
-              </div>
-              <p>This OTP is valid for 10 minutes.</p>
-              <p>If you didn't request this, please ignore this email.</p>
+      const mailOptions = {
+        from: `"${process.env.SMTP_FROM_NAME || 'OTP Service'}" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: 'Your OTP Code',
+        text: `Your OTP code is: ${otp}\nThis code will expire in 10 minutes.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Your OTP Code</h2>
+            <p>Your one-time verification code is:</p>
+            <div style="font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0; padding: 15px; background: #f5f5f5; display: inline-block; border-radius: 5px;">
+              ${otp}
             </div>
-          `
-        });
+            <p>This code will expire in 10 minutes.</p>
+            <p>If you didn't request this code, you can safely ignore this email.</p>
+          </div>
+        `,
+      };
 
-        console.log('Email sent successfully:', info.messageId);
-        console.log('Email sent to:', email);
-      }
+      console.log('Sending email to:', email);
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Email sent:', info.messageId);
     } catch (emailError) {
+      console.error('Error sending email:', emailError);
+      // Don't fail the request if email fails, as OTP is already stored
       console.error('Email sending failed:', emailError);
       // Don't fail the request in development
       if (process.env.NODE_ENV === 'production') {

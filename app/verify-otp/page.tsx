@@ -1,0 +1,417 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+
+export default function VerifyOtpPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get('email') || '';
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(60);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [verificationComplete, setVerificationComplete] = useState(false);
+
+  // Handle OTP input change
+  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 6) {
+      setOtp(value);
+      setError(null);
+      
+      // Only auto-submit if we have exactly 6 digits and email is present
+      if (value.length === 6 && email) {
+        // Add a longer delay to ensure state is updated before submission
+        setTimeout(() => {
+          handleSubmit(e as React.FormEvent);
+        }, 300);
+      }
+    }
+  };
+
+  // Handle paste event for OTP
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain').replace(/\D/g, '');
+    if (pastedData) {
+      const validOtp = pastedData.substring(0, 6);
+      setOtp(validOtp);
+      setError(null);
+      
+      // Only auto-submit if we have exactly 6 digits and email is present
+      if (validOtp.length === 6 && email) {
+        // Add a longer delay to ensure state is updated before submission
+        setTimeout(() => {
+          handleSubmit(e as React.FormEvent);
+        }, 300);
+      }
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate email and OTP before proceeding
+    if (!email) {
+      setError('Email address is missing. Please go back to the previous step.');
+      return;
+    }
+    
+    if (!otp || otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+      setError('Please enter a valid 6-digit OTP');
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const requestBody = { 
+        email, 
+        otp,
+        purpose: searchParams.get('type') === 'signup' ? 'signup' : 'password_reset'
+      };
+
+      console.log('Verifying OTP:', requestBody);
+      
+      const response = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+
+      let data;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid response from server');
+      }
+
+      console.log('OTP verification response:', data);
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to verify OTP');
+      }
+
+      // If this is a signup flow, show password form
+      if (searchParams.get('type') === 'signup') {
+        setShowPasswordForm(true);
+        setSuccess('OTP verified! Please set your password.');
+      } else {
+        setSuccess('Email verified successfully! Redirecting to login...');
+        setTimeout(() => router.push('/login'), 2000);
+      }
+    } catch (error: Error | unknown) {
+      const err = error as Error;
+      console.error('OTP verification error:', error);
+      // Handle error response from API
+      if (err.message && err.message.includes('Failed to verify OTP')) {
+        setError('The OTP you entered is incorrect or has expired. Please try again or request a new OTP.');
+      } else {
+        setError(err.message || 'An error occurred while verifying your OTP. Please try again.');  
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle resend OTP
+  const handleResendOtp = async () => {
+    if (resendDisabled) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+      
+      console.log('Requesting new OTP for email:', email);
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      let data;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid response from server');
+      }
+
+      console.log('Resend OTP response:', { status: response.status, data });
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to resend OTP');
+      }
+
+      // Start countdown for resend
+      setResendDisabled(true);
+      setResendCountdown(60);
+      
+      const countdownInterval = setInterval(() => {
+        setResendCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            setResendDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      setSuccess('A new OTP has been sent to your email.');
+    } catch (error: Error | unknown) {
+      const err = error as Error;
+      console.error('Error resending OTP:', error);
+      setError(err.message || 'Failed to resend OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle password submission
+  const handlePasswordSubmit = async () => {
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Get the pending user data from session storage
+      const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser') || '{}');
+      
+      // Complete the signup with password
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: pendingUser.email,
+          name: pendingUser.name,
+          password: password,
+          otp: otp
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create account');
+      }
+      
+      setVerificationComplete(true);
+      setSuccess('Account created successfully! Redirecting to login...');
+      
+      // Clear session storage
+      sessionStorage.removeItem('pendingUser');
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      
+    } catch (error: Error | unknown) {
+      const err = error as Error;
+      console.error('Error creating account:', error);
+      setError(err.message || 'Failed to create account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Render the component
+  return (
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500">
+      <div className="max-w-md w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20">
+        <div>
+          <h2 className="text-center text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Verify Your Email
+          </h2>
+          <p className="mt-4 text-center text-gray-600">
+            We&apos;ve sent a 6-digit code to <span className="font-medium">{email || 'your email'}</span>
+          </p>
+        </div>
+
+        {error && (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-red-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {success && (
+          <div className="rounded-md bg-green-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">{success}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!verificationComplete && (
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div className="relative">
+              <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
+                Enter 6-digit OTP
+              </label>
+              <input
+                id="otp"
+                type="text"
+                inputMode="numeric"
+                pattern="\d*"
+                maxLength={6}
+                value={otp}
+                onChange={handleOtpChange}
+                onPaste={handlePaste}
+                autoComplete="one-time-code"
+                autoFocus
+                className={`w-full px-4 py-3 border ${
+                  error ? 'border-red-500' : 'border-gray-300'
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-xl tracking-widest font-mono text-gray-900 bg-white`}
+                placeholder="_ _ _ _ _ _"
+                disabled={loading || showPasswordForm}
+              />
+              {otp.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setOtp('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Clear OTP"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <button
+                type="submit"
+                disabled={loading || otp.length !== 6 || showPasswordForm}
+                className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${
+                  loading || otp.length !== 6 || showPasswordForm
+                    ? 'bg-blue-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                }`}
+              >
+                {loading ? 'Verifying...' : 'Verify OTP'}
+              </button>
+
+              <div className="text-center text-sm">
+                <span className="text-gray-600">Didn&apos;t receive code? </span>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resendDisabled || loading || showPasswordForm}
+                  className={`font-medium ${
+                    resendDisabled || showPasswordForm
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-blue-600 hover:text-blue-700 hover:underline'
+                  }`}
+                >
+                  {resendDisabled ? `Resend in ${resendCountdown}s` : 'Resend OTP'}
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+
+        {showPasswordForm && !verificationComplete && (
+          <div className="mt-8 space-y-6">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
+                placeholder="Enter password"
+                required
+                minLength={6}
+                disabled={loading}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
+                placeholder="Confirm password"
+                required
+                minLength={6}
+                disabled={loading}
+              />
+            </div>
+            
+            <button
+              type="button"
+              onClick={handlePasswordSubmit}
+              disabled={loading}
+              className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${
+                loading
+                  ? 'bg-purple-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+              }`}
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </div>
+        )}
+
+        <div className="text-center text-sm mt-4">
+          <p className="text-gray-600">
+            Wrong email?{' '}
+            <Link 
+              href="/signup" 
+              className="font-medium text-purple-600 hover:text-purple-700 hover:underline"
+            >
+              Go back
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
