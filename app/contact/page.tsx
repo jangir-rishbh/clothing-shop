@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -8,9 +9,22 @@ export default function ContactPage() {
     lastName: '',
     email: '',
     phone: '',
+    password: '',
     message: '',
     privacyPolicy: false
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+    // Focus the password field after toggling
+    setTimeout(() => {
+      if (passwordRef.current) {
+        passwordRef.current.focus();
+      }
+    }, 0);
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{success: boolean; message: string} | null>(null);
 
@@ -73,6 +87,7 @@ export default function ContactPage() {
           lastName: '',
           email: '',
           phone: '',
+          password: '',
           message: '',
           privacyPolicy: false
         });
@@ -323,6 +338,35 @@ export default function ContactPage() {
                     />
                     <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                   </div>
+                                    <div className="relative group">
+                      <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-1 ml-1">Password</label>
+                      <div className="relative">
+                        <input
+                          ref={passwordRef}
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          id="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 pr-12 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                          placeholder="Create a password"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? (
+                            <FiEyeOff className="h-5 w-5" />
+                          ) : (
+                            <FiEye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                      <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
+                    </div>
                   
                   <div className="mt-6 relative group">
                     <label htmlFor="message" className="block text-sm font-medium text-gray-200 mb-1 ml-1">Your Message</label>
