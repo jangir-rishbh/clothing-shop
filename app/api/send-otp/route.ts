@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -57,18 +57,26 @@ export async function POST(request: Request) {
     // For development, log OTP to console
     console.log('Generated OTP for development:', otp);
     
-    // In development, skip actual email sending
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    if (!isProduction) {
-      console.log('Skipping email sending in development mode');
-    } else {
-      // Only attempt to send email in production
-      try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        const { error: emailError } = await resend.emails.send({
-          from: 'onboarding@resend.dev',
-          to: email,
+    // Always try to send email in both development and production
+    try {
+      // Create Nodemailer transporter with Gmail service
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      } as const);
+
+      // Check if SMTP credentials are configured
+      if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.warn('SMTP credentials are not configured. Email will not be sent.');
+        console.log('For development, use the OTP from console:', otp);
+      } else {
+        // Send email
+        const info = await transporter.sendMail({
+          from: `"${process.env.SMTP_FROM_NAME || 'Your App'}" <${process.env.SMTP_USER}>`,
+          to: email, // Using the email from request, not hardcoded
           subject: 'Your OTP Code',
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -83,16 +91,16 @@ export async function POST(request: Request) {
           `
         });
 
-        if (emailError) {
-          console.error('Resend API Error:', emailError);
-          throw new Error('Failed to send OTP email');
-        }
-      } catch (emailError) {
-        console.error('Email sending failed:', emailError);
-        // Don't fail the request in development
-        if (isProduction) {
-          throw new Error('Failed to send OTP email');
-        }
+        console.log('Email sent successfully:', info.messageId);
+        console.log('Email sent to:', email);
+      }
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Don't fail the request in development
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Failed to send OTP email');
+      } else {
+        console.log('For development, use the OTP from console:', otp);
       }
     }
 

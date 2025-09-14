@@ -106,6 +106,7 @@ export default function LoginPage() {
         }
 
         // Verify OTP before proceeding with signup
+        console.log('Verifying OTP for email:', formData.email);
         const verifyResponse = await fetch('/api/verify-otp', {
           method: 'POST',
           headers: {
@@ -118,9 +119,17 @@ export default function LoginPage() {
         });
 
         const verifyData = await verifyResponse.json();
+        console.log('OTP verification response:', { status: verifyResponse.status, data: verifyData });
 
         if (!verifyResponse.ok) {
-          throw new Error(verifyData.error || 'Failed to verify OTP');
+          // Handle specific OTP error cases
+          if (verifyData.code === 'INVALID_OTP') {
+            throw new Error('The OTP you entered is incorrect. Please try again.');
+          } else if (verifyResponse.status === 404) {
+            throw new Error('No active OTP found. Please request a new OTP.');
+          } else {
+            throw new Error(verifyData.error || 'Failed to verify OTP. Please try again.');
+          }
         }
 
         // OTP verified, proceed with signup
