@@ -26,11 +26,11 @@ export default function LoginPage() {
     name: '',
     otp: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showOtpField, setShowOtpField] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [otpSent, setOtpSent] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        // Sign in
+        // Sign in with email and password
         const { error } = await signIn(formData.email, formData.password);
         if (error) throw error;
         router.push(redirectTo);
@@ -201,30 +201,13 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm mb-4"
                 placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}
                 disabled={otpSent}
               />
             </div>
-            {!isLogin && showOtpField && (
-              <div>
-                <label htmlFor="otp" className="sr-only">OTP</label>
-                <input
-                  id="otp"
-                  name="otp"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d{6}"
-                  required
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                  placeholder="Enter 6-digit OTP"
-                  value={formData.otp}
-                  onChange={handleChange}
-                />
-              </div>
-            )}
             <div>
               <div className="relative">
                 <label htmlFor="password" className="sr-only">Password</label>
@@ -233,9 +216,9 @@ export default function LoginPage() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete={isLogin ? 'current-password' : 'new-password'}
-                  required
+                  required={isLogin}
                   className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm pr-10"
-                  placeholder="Password"
+                  placeholder={isLogin ? "Password" : "Create a password"}
                   value={formData.password}
                   onChange={handleChange}
                   disabled={!isLogin && !otpSent}
@@ -263,6 +246,23 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+            {!isLogin && showOtpField && (
+              <div>
+                <label htmlFor="otp" className="sr-only">OTP</label>
+                <input
+                  id="otp"
+                  name="otp"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  required
+                  className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                  placeholder="Enter 6-digit OTP"
+                  value={formData.otp}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
           </div>
 
           {isLogin ? (
