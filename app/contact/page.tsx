@@ -32,6 +32,8 @@ export default function ContactPage() {
         success: false,
         message: 'Please accept the privacy policy to continue.'
       });
+      // Scroll to the privacy policy checkbox
+      document.getElementById('privacyPolicy')?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
@@ -45,22 +47,27 @@ export default function ContactPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          message: formData.message
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          message: formData.message.trim()
         }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        setSubmitStatus({
-          success: true,
-          message: 'Thank you for your message! We will get back to you soon.'
-        });
-        // Reset form
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      setSubmitStatus({
+        success: true,
+        message: data.message || 'Thank you for your message! We will get back to you soon.'
+      });
+      
+      // Reset form on success
+      if (data.success) {
         setFormData({
           firstName: '',
           lastName: '',
@@ -69,33 +76,46 @@ export default function ContactPage() {
           message: '',
           privacyPolicy: false
         });
-      } else {
-        throw new Error(data.error || 'Failed to send message');
+        
+        // Scroll to the success message
+        setTimeout(() => {
+          const successElement = document.getElementById('form-status');
+          if (successElement) {
+            successElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus({
         success: false,
-        message: 'Failed to send message. Please try again later.'
+        message: error instanceof Error ? error.message : 'Failed to send message. Please try again later.'
       });
+      
+      // Scroll to the error message
+      setTimeout(() => {
+        const errorElement = document.getElementById('form-status');
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="inline-block">
-            <h1 className="text-4xl md:text-5xl font-serif italic font-bold text-gray-800 mb-2">
-              <span className="relative">
-                <span className="text-yellow-500">Get in</span> Touch
-              </span>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-16 animate-fade-in">
+          <div className="inline-block transform transition-all duration-500 hover:scale-105">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-pink-500">
+              Get in Touch
             </h1>
-            <div className="w-20 h-0.5 bg-yellow-500 mx-auto my-4"></div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto mt-6 font-light">
-              We&apos;re here to help and answer any questions you might have.
+            <div className="w-32 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 mx-auto my-6 rounded-full"></div>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto mt-6 font-light">
+              We&apos;re here to help and answer any questions you might have. 
+              <span className="block mt-2 text-yellow-300">Let&apos;s start a conversation!</span>
             </p>
           </div>
         </div>
@@ -224,110 +244,194 @@ export default function ContactPage() {
             
             {/* Right Side - Contact Form */}
             <div className="md:w-3/5 p-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Send us a message</h2>
-              <p className="text-gray-600 mb-8">We&apos;ll get back to you as soon as possible</p>
+              <div className="mb-10 text-center">
+                <div className="inline-block relative">
+                  <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 mb-3">
+                    Send us a message
+                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-pink-500 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                  </h2>
+                  <p className="text-lg text-gray-300 mt-3">
+                    We&apos;re excited to hear from you! 
+                    <span className="block text-yellow-300 font-medium">Let&apos;s start a conversation.</span>
+                  </p>
+                  <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 rounded-full"></div>
+                </div>
+              </div>
               
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <input 
-                      type="text" 
-                      id="first-name" 
-                      name="firstName"
-                      value={formData.firstName}
+              <form onSubmit={handleSubmit} className="relative max-w-3xl mx-auto bg-gradient-to-br from-purple-900/80 to-indigo-900/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/10 transform transition-all duration-500 hover:shadow-2xl hover:shadow-pink-500/30 group">
+                {/* Decorative elements */}
+                <div className="absolute top-0 -right-10 w-32 h-32 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+                <div className="absolute top-0 -left-10 w-32 h-32 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+                <div className="absolute -bottom-10 left-1/2 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+                <div className="p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="relative group">
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-200 mb-1 ml-1">First Name</label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                        placeholder="John"
+                        required
+                      />
+                      <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
+                    </div>
+                    <div className="relative group">
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-200 mb-1 ml-1">Last Name</label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        id="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                        placeholder="Doe"
+                        required
+                      />
+                      <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="relative group">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-1 ml-1">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      id="email"
+                      value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors text-gray-800"
-                      placeholder="John"
+                      className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                      placeholder="your@email.com"
                       required
                     />
+                    <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                   </div>
-                  <div>
-                    <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    <input 
-                      type="text" 
-                      id="last-name" 
-                      name="lastName"
-                      value={formData.lastName}
+                  
+                  <div className="relative group">
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-200 mb-1 ml-1">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      id="phone"
+                      value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors text-gray-800"
-                      placeholder="Doe"
-                      required
+                      className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                      placeholder="+1 (555) 123-4567"
                     />
+                    <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                   </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors text-gray-800"
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    id="phone" 
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors text-gray-800"
-                    placeholder="+91 86967 90758"
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Your Message</label>
-                  <textarea 
-                    id="message" 
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors text-gray-800"
-                    placeholder="How can we help you?"
-                    required
-                  ></textarea>
-                </div>
-                
-                <div className="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    id="privacy-policy" 
-                    name="privacyPolicy"
-                    checked={formData.privacyPolicy}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="privacy-policy" className="ml-2 block text-sm text-gray-700">
-                    I agree to the <a href="#" className="text-purple-600 hover:text-purple-800">Privacy Policy</a>
-                  </label>
-                </div>
-                
-                <div>
-                  <button 
-                    type="submit" 
-                    disabled={isSubmitting}
-                    className={`w-full bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-3 px-6 rounded-lg font-medium hover:opacity-90 transition-opacity ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
-                  >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </button>
+                  
+                  <div className="mt-6 relative group">
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-200 mb-1 ml-1">Your Message</label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={4}
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                      placeholder="How can we help you?"
+                      required
+                    ></textarea>
+                    <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
+                  </div>
+                  
+                  <div className="mt-8 flex items-start">
+                    <div className="flex items-center h-5">
+                      <div className="relative flex items-center">
+                        <input
+                          id="privacyPolicy"
+                          name="privacyPolicy"
+                          type="checkbox"
+                          checked={formData.privacyPolicy}
+                          onChange={handleChange}
+                          className="h-5 w-5 rounded border-gray-600 bg-white/5 text-yellow-400 focus:ring-yellow-500/50 focus:ring-offset-0 focus:outline-none focus:ring-2 transition-all duration-200 cursor-pointer"
+                          required
+                        />
+                        <svg 
+                          className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-yellow-400 pointer-events-none transition-opacity duration-200 ${formData.privacyPolicy ? 'opacity-100' : 'opacity-0'}`}
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="ml-3 text-sm">
+                      <label htmlFor="privacyPolicy" className="font-medium text-gray-300 cursor-pointer">
+                        I agree to the{' '}
+                        <a href="#" className="text-yellow-400 hover:text-yellow-300 transition-colors duration-200 font-semibold">
+                          Privacy Policy
+                        </a>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-10 relative group">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`w-full flex justify-center items-center py-4 px-8 rounded-xl text-lg font-semibold text-white bg-gradient-to-r from-yellow-500 to-pink-500 hover:from-yellow-400 hover:to-pink-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:ring-offset-2 focus:ring-offset-indigo-900 transition-all duration-400 transform hover:scale-[1.02] shadow-lg hover:shadow-yellow-500/20 ${
+                        isSubmitting ? 'opacity-80 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <span className="relative z-10">Send Message</span>
+                          <span className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-pink-400 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                        </>
+                      )}
+                    </button>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-pink-500 rounded-xl opacity-20 blur-sm group-hover:opacity-40 transition-opacity duration-300"></div>
+                  </div>
                   
                   {submitStatus && (
-                    <div className={`mt-4 p-3 rounded-lg text-center ${
-                      submitStatus.success 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {submitStatus.message}
+                    <div 
+                      id="form-status"
+                      className={`mt-6 p-4 rounded-xl border-l-4 ${
+                        submitStatus.success 
+                          ? 'bg-green-500/10 border-green-400 text-green-200' 
+                          : 'bg-red-500/10 border-red-400 text-red-200'
+                      } backdrop-blur-sm transform transition-all duration-300 animate-fade-in`}
+                    >
+                      <div className="flex items-start">
+                        <div className={`flex-shrink-0 h-5 w-5 ${submitStatus.success ? 'text-green-400' : 'text-red-400'}`}>
+                          {submitStatus.success ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium">
+                            {submitStatus.message}
+                            {!submitStatus.success && (
+                              <button 
+                                onClick={() => setSubmitStatus(null)}
+                                className="ml-2 text-xs bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-md transition-colors"
+                              >
+                                Dismiss
+                              </button>
+                            )}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -392,7 +496,7 @@ export default function ContactPage() {
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">Follow Us</h2>
               </div>
               
-              <p className="text-gray-600 mb-6">Stay connected with us on social media for the latest updates and offers.</p>
+              <p className="text-gray-600 mb-6">Visit our store to explore our exclusive collection and enjoy personalized assistance from our fashion experts.</p>
               
               <div className="flex space-x-4">
                 <a href="#" className="p-3 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors">
