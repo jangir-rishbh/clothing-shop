@@ -3,13 +3,12 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { session, signOut, loading } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
 
   // Close mobile menu when route changes
@@ -108,11 +107,7 @@ export default function Navbar() {
                     Login
                   </Link>
                   <Link
-                    href="/login"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      router.push('/login?signup=true');
-                    }}
+                    href="/signup"
                     className="px-4 py-2 bg-white text-purple-600 rounded-md hover:bg-gray-100 transition-colors"
                   >
                     Sign Up
@@ -210,13 +205,9 @@ export default function Navbar() {
                       Login
                     </Link>
                     <Link
-                      href="/login"
+                      href="/signup"
                       className="block w-full px-4 py-3 text-center text-base font-medium text-purple-600 bg-white rounded-lg hover:bg-gray-100 transition-colors"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setIsMenuOpen(false);
-                        router.push('/login?signup=true');
-                      }}
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       Sign Up
                     </Link>
