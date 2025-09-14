@@ -111,8 +111,8 @@ export default function ContactPage() {
             </div>
             <h3 className="text-xl font-bold text-center text-gray-800 mb-4">Call Us</h3>
             <p className="text-gray-600 text-center mb-4">Speak with our team</p>
-            <a href="tel:+919876543210" className="block text-center text-purple-600 hover:text-purple-800 text-lg font-medium transition-colors">
-              +91 98765 43210
+            <a href="tel:+918696790758" className="block text-center text-purple-600 hover:text-purple-800 text-lg font-medium transition-colors">
+              +91 86967 90758
             </a>
           </div>
           
@@ -125,8 +125,8 @@ export default function ContactPage() {
             </div>
             <h3 className="text-xl font-bold text-center text-gray-800 mb-4">Email Us</h3>
             <p className="text-gray-600 text-center mb-4">Send us a message</p>
-            <a href="mailto:info@mababaclothestore.com" className="block text-center text-blue-600 hover:text-blue-800 text-lg font-medium transition-colors">
-              info@mababaclothestore.com
+            <a href="mailto:manishjangir348@gmail.com" className="block text-center text-blue-600 hover:text-blue-800 text-lg font-medium transition-colors">
+              manishjangir348@gmail.com
             </a>
           </div>
           
@@ -141,9 +141,9 @@ export default function ContactPage() {
             <h3 className="text-xl font-bold text-center text-gray-800 mb-4">Visit Us</h3>
             <p className="text-gray-600 text-center mb-4">Come say hello</p>
             <div className="text-center text-gray-700">
-              <p>Main Market, Village</p>
-              <p>District - Your District</p>
-              <p>State - Your State, PIN - 123456</p>
+              <p>Post office gadli, Gadli</p>
+              <p>District - Jhunjhunu</p>
+              <p>State - Rajasthan, PIN - 333033</p>
             </div>
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold">Call Us</h4>
-                    <p className="text-purple-100">+91 98765 43210</p>
+                    <p className="text-purple-100">+91 86967 90758</p>
                   </div>
                 </div>
                 
@@ -177,7 +177,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold">Email Us</h4>
-                    <p className="text-purple-100">info@mababaclothestore.com</p>
+                    <p className="text-purple-100">manishjangir348@gmail.com</p>
                   </div>
                 </div>
                 
@@ -190,7 +190,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold">Location</h4>
-                    <p className="text-purple-100">Main Market, Village, District - 123456</p>
+                    <p className="text-purple-100">Post office gadli, Gadli</p>
+                    <p className="text-purple-100">District - Jhunjhunu</p>
+                    <p className="text-purple-100">State - Rajasthan, PIN - 333033</p>
                   </div>
                 </div>
               </div>
@@ -278,7 +280,7 @@ export default function ContactPage() {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-colors text-gray-800"
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 86967 90758"
                   />
                 </div>
                 

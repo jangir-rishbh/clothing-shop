@@ -6,43 +6,79 @@ import { useAuth } from "@/context/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "../components/ProductCard";
 
-// Dummy product data
+// Clothing collection with different categories
 const featuredProducts = [
+  // Sarees
   {
-    id: "1",
-    name: "Men's Shirt",
-    price: 899,
-    image: "https://placehold.co/400x600/2563eb/white?text=Shirt",
-    category: "Men"
+    id: "s1",
+    name: "Banarasi Silk Saree",
+    price: 5499,
+    image: "https://images.unsplash.com/photo-1609505848912-b7c3b8b4beda?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1035&q=80",
+    category: "Saree"
   },
   {
-    id: "2",
-    name: "Women's Saree",
-    price: 1499,
-    image: "https://placehold.co/400x600/7c3aed/white?text=Saree",
-    category: "Women"
+    id: "s2",
+    name: "Kanjivaram Silk",
+    price: 6999,
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    category: "Saree"
+  },
+  
+  // Suits
+  {
+    id: "st1",
+    name: "Designer Suit Set",
+    price: 4299,
+    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1136&q=80",
+    category: "Suit"
   },
   {
-    id: "3",
-    name: "Kids Suit",
-    price: 699,
-    image: "https://placehold.co/400x600/10b981/white?text=Kids+Suit",
-    category: "Kids"
+    id: "st2",
+    name: "Party Wear Suit",
+    price: 3599,
+    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
+    category: "Suit"
+  },
+  
+  // Jeans
+  {
+    id: "j1",
+    name: "Slim Fit Jeans",
+    price: 1799,
+    image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1026&q=80",
+    category: "Jeans"
   },
   {
-    id: "4",
-    name: "Jeans Pants",
-    price: 999,
-    image: "https://placehold.co/400x600/1e40af/white?text=Jeans",
-    category: "Men"
+    id: "j2",
+    name: "Ripped Jeans",
+    price: 2199,
+    image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1026&q=80",
+    category: "Jeans"
   },
+  
+  // Pants
+  {
+    id: "p1",
+    name: "Formal Trousers",
+    price: 1599,
+    image: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1025&q=80",
+    category: "Pants"
+  },
+  {
+    id: "p2",
+    name: "Casual Chinos",
+    price: 1399,
+    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1136&q=80",
+    category: "Pants"
+  }
 ];
 
 // Categories
 const categories = [
-  { name: "Men", image: "https://placehold.co/400x300/2563eb/white?text=Men", link: "/products?category=men" },
-  { name: "Women", image: "https://placehold.co/400x300/7c3aed/white?text=Women", link: "/products?category=women" },
-  { name: "Kids", image: "https://placehold.co/400x300/10b981/white?text=Kids", link: "/products?category=kids" },
+  { name: "Sarees", image: "https://images.unsplash.com/photo-1609505848912-b7c3b8b4beda?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", link: "/products?category=saree" },
+  { name: "Suits", image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", link: "/products?category=suit" },
+  { name: "Jeans", image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", link: "/products?category=jeans" },
+  { name: "Pants", image: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80", link: "/products?category=pants" },
 ];
 
 export default function HomePage() {

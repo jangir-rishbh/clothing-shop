@@ -29,9 +29,19 @@ export default function Footer() {
           </div>
           <div>
             <h3 className="text-xl font-bold mb-4">Contact Us</h3>
-            <p className="text-gray-300">Main Road, Your City</p>
-            <p className="text-gray-300">Phone: 123-456-7890</p>
-            <p className="text-gray-300">Email: info@mababaclothstore.com</p>
+            <p className="text-gray-300">Post office gadli, Gadli</p>
+            <p className="text-gray-300">District - Jhunjhunu</p>
+            <p className="text-gray-300">State - Rajasthan, PIN - 333033</p>
+            <p className="text-gray-300">
+              <a href="tel:+918696790758" className="hover:text-white">
+                Phone: +91 86967 90758
+              </a>
+            </p>
+            <p className="text-gray-300">
+              <a href="mailto:manishjangir348@gmail.com" className="hover:text-white">
+                Email: manishjangir348@gmail.com
+              </a>
+            </p>
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 text-center">
