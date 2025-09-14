@@ -7,7 +7,6 @@ const publicRoutes = [
   '/home',
   '/about',
   '/contact',
-  '/products',
   '/login',
   '/signup',
   '/_next',

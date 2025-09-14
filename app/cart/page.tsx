@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 
 // डमी कार्ट डेटा
 const initialCartItems = [
@@ -61,9 +60,7 @@ export default function CartPage() {
       {cartItems.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-xl mb-6">आपका कार्ट खाली है</p>
-          <Link href="/products" className="bg-purple-600 text-white px-6 py-3 rounded-md font-medium hover:bg-purple-700 transition-colors">
-            शॉपिंग जारी रखें
-          </Link>
+          <p className="text-gray-600">कृपया स्टोर पर जाएं</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -152,15 +149,6 @@ export default function CartPage() {
               <button className="w-full bg-purple-600 text-white py-3 rounded-md font-medium mt-6 hover:bg-purple-700 transition-colors">
                 चेकआउट करें
               </button>
-              
-              <div className="mt-6">
-                <Link href="/products" className="text-purple-600 hover:text-purple-800 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                  </svg>
-                  शॉपिंग जारी रखें
-                </Link>
-              </div>
             </div>
           </div>
         </div>
