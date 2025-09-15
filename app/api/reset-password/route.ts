@@ -40,17 +40,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify email exists in profiles table
-    const { error: userError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('email', email)
-      .single();
+    // Get user from auth.users table
+    const { data: { users }, error: userError } = await supabase.auth.admin.listUsers();
+    const user = users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
 
-    if (userError) {
+    if (userError || !user) {
       console.error('Error fetching user:', userError);
       return NextResponse.json(
-        { message: 'Invalid or expired OTP' },
+        { message: 'User not found' },
         { status: 400 }
       );
     }
@@ -58,12 +55,16 @@ export async function POST(request: Request) {
     // Mark OTP as used
     await supabase
       .from('otp_verifications')
-      .update({ verified: true, verified_at: new Date().toISOString() })
+      .update({ 
+        verified: true, 
+        verified_at: new Date().toISOString(),
+        user_id: user.id // Ensure user_id is set to the correct UUID
+      })
       .eq('id', otpData.id);
 
-    // Update user's password
+    // Update user's password using the user ID from auth.users
     const { error: updateUserError } = await supabase.auth.admin.updateUserById(
-      otpData.user_id,
+      user.id,
       { password: newPassword }
     );
 
