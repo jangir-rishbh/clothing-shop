@@ -118,15 +118,19 @@ export async function POST(request: Request) {
     // Send OTP via email
     try {
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false,
+        requireTLS: true,
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
         },
+        debug: true
       });
 
       const mailOptions = {
-        from: `"Your App Name" <${process.env.EMAIL_USER}>`,
+        from: `"${process.env.NEXT_PUBLIC_APP_NAME || 'Your App'}" <${process.env.SMTP_USER}>`,
         to: email,
         subject: 'Your OTP Code',
         html: `

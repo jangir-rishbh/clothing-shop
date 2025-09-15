@@ -14,21 +14,38 @@ interface SendEmailResponse {
 }
 
 export const sendOtpEmail = async (to: string, otp: string): Promise<SendEmailResponse> => {
-  if (!process.env.NEXT_PUBLIC_GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+  console.log('Email Config:', {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    user: process.env.SMTP_USER,
+    hasPass: !!process.env.SMTP_PASS
+  });
+  
+  if (!process.env.SMTP_HOST || !process.env.SMTP_PORT || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    const error = new Error('Email configuration is incomplete. Please check your environment variables.');
     console.error('Missing email configuration:', {
-      email: process.env.NEXT_PUBLIC_GMAIL_EMAIL ? 'Configured' : 'Missing',
-      appPassword: process.env.GMAIL_APP_PASSWORD ? 'Configured' : 'Missing'
+      SMTP_HOST: process.env.SMTP_HOST ? 'Configured' : 'Missing',
+      SMTP_PORT: process.env.SMTP_PORT ? 'Configured' : 'Missing',
+      SMTP_USER: process.env.SMTP_USER ? 'Configured' : 'Missing',
+      SMTP_PASS: process.env.SMTP_PASS ? 'Configured' : 'Missing'
     });
-    throw new Error('Email configuration is incomplete. Please check your environment variables.');
+    throw error;
   }
 
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.NEXT_PUBLIC_GMAIL_EMAIL,
-        pass: process.env.GMAIL_APP_PASSWORD,
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT),
+      secure: false, // true for 465, false for other ports
+      requireTLS: true,
+      tls: {
+        rejectUnauthorized: false
       },
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      },
+      debug: true
     });
 
     // Verify connection
@@ -45,7 +62,7 @@ export const sendOtpEmail = async (to: string, otp: string): Promise<SendEmailRe
     });
 
     const mailOptions = {
-      from: `"${process.env.NEXT_PUBLIC_APP_NAME || 'Your App'}" <${process.env.NEXT_PUBLIC_GMAIL_EMAIL}>`,
+      from: `"${process.env.NEXT_PUBLIC_APP_NAME || 'Your App'}" <${process.env.EMAIL_FROM || process.env.SMTP_USER}>`,
       to,
       subject: 'Your Password Reset OTP',
       html: `
