@@ -19,10 +19,11 @@ export async function POST(request: Request) {
     const requestBody = await request.text();
     console.log('Raw request body:', requestBody);
     
-    let email, purpose;
+    let email, purpose, name;
     try {
       const json = JSON.parse(requestBody);
       email = json.email;
+      name = json.name || '';
       purpose = json.purpose || 'verification';
       console.log('Parsed request:', { email, purpose });
     } catch (parseError) {
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check if email is provided
     if (!email) {
       console.error('No email provided in request');
       return NextResponse.json(
@@ -48,58 +50,64 @@ export async function POST(request: Request) {
 
     // Store OTP in the database
     const expiresAtISO = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-    console.log('Storing OTP for email:', email, 'expires at:', expiresAtISO);
-
-    // Check if an OTP already exists for this email
-    console.log('Checking for existing OTPs for email:', email);
-    const { data: existingOtp, error: fetchError } = await supabaseAdmin
-      .from('otp_verifications')
-      .select('id')
-      .eq('email', email)
-      .maybeSingle();
-
-    console.log('Existing OTP check result:', { existingOtp, fetchError });
     
-    let data, error;
-    const otpData = {
-      email,
-      otp,
-      expires_at: expiresAtISO,
-      created_at: new Date().toISOString()
+    // Function to store OTP for a given identifier (email or phone)
+    const storeOtp = async (identifier: string, type: 'email' | 'phone') => {
+      const identifierField = type === 'email' ? 'email' : 'phone';
+      console.log(`Storing OTP for ${type}:`, identifier, 'expires at:', expiresAtISO);
+
+      // Check if an OTP already exists for this identifier
+      console.log(`Checking for existing OTPs for ${type}:`, identifier);
+      const { data: existingOtp, error: fetchError } = await supabaseAdmin
+        .from('otp_verifications')
+        .select('id')
+        .eq(identifierField, identifier)
+        .maybeSingle();
+
+      console.log(`Existing OTP check result for ${type}:`, { existingOtp, fetchError });
+      
+      const otpData = {
+        [identifierField]: identifier,
+        otp,
+        expires_at: expiresAtISO,
+        created_at: new Date().toISOString(),
+        purpose
+      };
+      
+      console.log('OTP data to be used:', JSON.stringify(otpData, null, 2));
+      
+      if (existingOtp) {
+        // Update existing OTP record
+        console.log(`Updating existing OTP for ${type}:`, identifier);
+        const result = await supabaseAdmin
+          .from('otp_verifications')
+          .update(otpData)
+          .eq('id', existingOtp.id)
+          .select()
+          .single();
+        
+        return { data: result.data, error: result.error };
+      } else {
+        // Insert new OTP
+        console.log(`Inserting new OTP for ${type}:`, identifier);
+        const result = await supabaseAdmin
+          .from('otp_verifications')
+          .insert(otpData)
+          .select()
+          .single();
+        
+        return { data: result.data, error: result.error };
+      }
     };
-    
-    console.log('OTP data to be used:', JSON.stringify(otpData, null, 2));
-    
-    if (existingOtp) {
-      // Update existing OTP record
-      console.log('Updating existing OTP for email:', email);
-      const result = await supabaseAdmin
-        .from('otp_verifications')
-        .update(otpData)
-        .eq('id', existingOtp.id)
-        .select()
-        .single();
-      
-      data = result.data;
-      error = result.error;
-    } else {
-      // Insert new OTP
-      console.log('Inserting new OTP for email:', email);
-      const result = await supabaseAdmin
-        .from('otp_verifications')
-        .insert(otpData)
-        .select()
-        .single();
-      
-      data = result.data;
-      error = result.error;
-    }
 
-    console.log('OTP storage result:', { data, error });
-
-    if (error) {
-      console.error('Error storing OTP in database:', error);
-      throw error;
+    // Store OTP for email
+    const { error: emailError } = await storeOtp(email.toLowerCase(), 'email');
+    if (emailError) {
+      console.error('Error storing email OTP:', emailError);
+      return NextResponse.json(
+        { error: 'Failed to generate OTP' },
+        { status: 500 }
+      );
     }
 
     console.log('OTP stored successfully in database');
@@ -107,48 +115,40 @@ export async function POST(request: Request) {
     // For development, log OTP to console
     console.log('Generated OTP for development:', otp);
     
-    // Always try to send email in both development and production
+    // Send OTP via email
     try {
-      // Create Nodemailer transporter with Gmail service
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD,
         },
       });
 
       const mailOptions = {
-        from: `"${process.env.SMTP_FROM_NAME || 'OTP Service'}" <${process.env.SMTP_USER}>`,
+        from: `"Your App Name" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Your OTP Code',
-        text: `Your OTP code is: ${otp}\nThis code will expire in 10 minutes.`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Your OTP Code</h2>
-            <p>Your one-time verification code is:</p>
-            <div style="font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0; padding: 15px; background: #f5f5f5; display: inline-block; border-radius: 5px;">
-              ${otp}
-            </div>
+            <p>Hello ${name || 'there'},</p>
+            <p>Your OTP code is: <strong>${otp}</strong></p>
             <p>This code will expire in 10 minutes.</p>
             <p>If you didn't request this code, you can safely ignore this email.</p>
+            <p>Thanks,<br>Your App Team</p>
           </div>
         `,
       };
 
-      console.log('Sending email to:', email);
-      const info = await transporter.sendMail(mailOptions);
-      console.log('Email sent:', info.messageId);
-    } catch (emailError) {
-      console.error('Error sending email:', emailError);
-      // Don't fail the request if email fails, as OTP is already stored
-      console.error('Email sending failed:', emailError);
-      // Don't fail the request in development
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error('Failed to send OTP email');
-      } else {
-        console.log('For development, use the OTP from console:', otp);
-      }
+      await transporter.sendMail(mailOptions);
+      console.log('OTP email sent successfully');
+    } catch (error) {
+      console.error('Error in send-otp:', error);
+      return NextResponse.json(
+        { error: 'Failed to send OTP' },
+        { status: 500 }
+      );
     }
 
     console.log(`OTP email sent to ${email}`);
@@ -156,6 +156,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: 'OTP sent successfully to your email',
+      deliveryMethod: 'email',
+      deliveryTarget: email
     });
   } catch (error) {
     console.error('Error in send-otp:', error);

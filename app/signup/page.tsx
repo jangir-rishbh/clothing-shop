@@ -7,9 +7,7 @@ import Link from 'next/link';
 
 type FormData = {
   email: string;
-  password: string;
   name: string;
-  otp: string;
 };
 
 export default function SignupPage() {
@@ -20,11 +18,8 @@ export default function SignupPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     email: '',
-    password: '',
-    name: '',
-    otp: ''
+    name: ''
   });
-  const [otpSent] = useState(false);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -45,45 +40,49 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccess(null);
+    setSuccess('Sending verification email...');
 
     try {
-      // For signup, first validate name and email
+      // Validate name and email
       if (!formData.name.trim()) {
         throw new Error('Name is required');
       }
+      
       if (!formData.email) {
         throw new Error('Email is required');
       }
       
-      // Send OTP without password
+      // Prepare OTP request data
+      const otpRequestData = {
+        name: formData.name.trim(),
+        purpose: 'signup_verification',
+        email: formData.email
+      };
+
+      // Send OTP via email
       const response = await fetch('/api/send-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          email: formData.email,
-          name: formData.name.trim(),
-          purpose: 'signup_verification'
-        }),
+        body: JSON.stringify(otpRequestData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send OTP');
+        throw new Error(data.error || 'Failed to send verification email');
       }
 
       // Store user data in session storage for after verification
       const userData = {
         email: formData.email,
-        name: formData.name.trim(),
+        name: formData.name.trim()
       };
       sessionStorage.setItem('pendingUser', JSON.stringify(userData));
 
-      // Redirect to verify-otp page with email as query param
-      router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}&type=signup`);
+      // Redirect to verify-otp page
+      router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } catch (error: unknown) {
       console.error('Signup error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
@@ -159,11 +158,12 @@ export default function SignupPage() {
                 placeholder="Full Name"
                 value={formData.name}
                 onChange={handleChange}
-                disabled={otpSent}
               />
             </div>
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
+                Email address
+              </label>
               <input
                 id="email-address"
                 name="email"
@@ -174,8 +174,10 @@ export default function SignupPage() {
                 placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}
-                disabled={otpSent}
               />
+              <p className="mt-1 text-xs text-gray-500">
+                We&apos;ll send you a verification code to your email
+              </p>
             </div>
           </div>
 
@@ -191,7 +193,7 @@ export default function SignupPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Processing...
+                  Sending verification email...
                 </>
               ) : 'Continue with Email'}
             </button>

@@ -8,6 +8,8 @@ export default function VerifyOtpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+  const phone = searchParams.get('phone') || '';
+  const verificationMethod = searchParams.get('method') || 'email'; // 'email' or 'phone'
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,8 +28,8 @@ export default function VerifyOtpPage() {
       setOtp(value);
       setError(null);
       
-      // Only auto-submit if we have exactly 6 digits and email is present
-      if (value.length === 6 && email) {
+      // Only auto-submit if we have exactly 6 digits and identifier is present
+      if (value.length === 6 && (email || phone)) {
         // Add a longer delay to ensure state is updated before submission
         setTimeout(() => {
           handleSubmit(e as React.FormEvent);
@@ -45,8 +47,8 @@ export default function VerifyOtpPage() {
       setOtp(validOtp);
       setError(null);
       
-      // Only auto-submit if we have exactly 6 digits and email is present
-      if (validOtp.length === 6 && email) {
+      // Only auto-submit if we have exactly 6 digits and identifier is present
+      if (validOtp.length === 6 && (email || phone)) {
         // Add a longer delay to ensure state is updated before submission
         setTimeout(() => {
           handleSubmit(e as React.FormEvent);
@@ -58,54 +60,54 @@ export default function VerifyOtpPage() {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate email and OTP before proceeding
-    if (!email) {
-      setError('Email address is missing. Please go back to the previous step.');
-      return;
-    }
-    
-    if (!otp || otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-      setError('Please enter a valid 6-digit OTP');
-      return;
-    }
-    
     setLoading(true);
     setError(null);
     setSuccess(null);
 
+    if (!otp || otp.length !== 6) {
+      setError('Please enter a valid 6-digit OTP');
+      setLoading(false);
+      return;
+    }
+
+    // Get the pending user data from session storage
+    const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser') || '{}');
+    const verificationMethod = pendingUser.verificationMethod || 'email';
+
     try {
-      const requestBody = { 
-        email, 
-        otp,
-        purpose: searchParams.get('type') === 'signup' ? 'signup' : 'password_reset'
-      };
-
-      console.log('Verifying OTP:', requestBody);
+      let response;
       
-      const response = await fetch('/api/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-      });
-
-      let data;
-      try {
-        const text = await response.text();
-        data = text ? JSON.parse(text) : {};
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
-        throw new Error('Invalid response from server');
+      if (verificationMethod === 'email') {
+        response = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            email: pendingUser.email, 
+            otp,
+            type: 'signup_verification'
+          })
+        });
+      } else {
+        // For phone verification
+        response = await fetch('/api/phone-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            phone: `+91${pendingUser.mobile}`,
+            otp,
+            action: 'verify'
+          })
+        });
       }
 
-      console.log('OTP verification response:', data);
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Failed to verify OTP');
+        throw new Error(data.error || 'Failed to verify OTP');
       }
 
-      // If this is a signup flow, show password form
-      if (searchParams.get('type') === 'signup') {
+      // If this is a signup flow, show password form after OTP verification
+      if (pendingUser && pendingUser.name) {
         setShowPasswordForm(true);
         setSuccess('OTP verified! Please set your password.');
       } else {
@@ -115,12 +117,7 @@ export default function VerifyOtpPage() {
     } catch (error: Error | unknown) {
       const err = error as Error;
       console.error('OTP verification error:', error);
-      // Handle error response from API
-      if (err.message && err.message.includes('Failed to verify OTP')) {
-        setError('The OTP you entered is incorrect or has expired. Please try again or request a new OTP.');
-      } else {
-        setError(err.message || 'An error occurred while verifying your OTP. Please try again.');  
-      }
+      setError(err.message || 'An error occurred while verifying your OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -128,37 +125,46 @@ export default function VerifyOtpPage() {
 
   // Handle resend OTP
   const handleResendOtp = async () => {
-    if (resendDisabled) return;
+    setResendDisabled(true);
+    setError(null);
+    setSuccess(null);
     
     try {
-      setLoading(true);
-      setError(null);
-      setSuccess(null);
+      // Get the pending user data from session storage
+      const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser') || '{}');
+      const verificationMethod = pendingUser.verificationMethod || 'email';
       
-      console.log('Requesting new OTP for email:', email);
-      const response = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      let data;
-      try {
-        const text = await response.text();
-        data = text ? JSON.parse(text) : {};
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
-        throw new Error('Invalid response from server');
+      let response;
+      
+      if (verificationMethod === 'email') {
+        response = await fetch('/api/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            email: pendingUser.email,
+            name: pendingUser.name,
+            purpose: 'resend_verification' 
+          })
+        });
+      } else {
+        // For phone verification
+        response = await fetch('/api/phone-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            phone: `+91${pendingUser.mobile}`,
+            action: 'send'
+          })
+        });
       }
 
-      console.log('Resend OTP response:', { status: response.status, data });
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Failed to resend OTP');
+        throw new Error(data.error || 'Failed to resend OTP');
       }
-
+      
       // Start countdown for resend
-      setResendDisabled(true);
       setResendCountdown(60);
       
       const countdownInterval = setInterval(() => {
@@ -244,11 +250,14 @@ export default function VerifyOtpPage() {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500">
       <div className="max-w-md w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20">
         <div>
-          <h2 className="text-center text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Verify Your Email
+          <h2 className="text-3xl font-bold text-center text-gray-900">
+            {verificationMethod === 'email' ? 'Verify Your Email' : 'Verify Your Phone'}
           </h2>
-          <p className="mt-4 text-center text-gray-600">
-            We&apos;ve sent a 6-digit code to <span className="font-medium">{email || 'your email'}</span>
+          <p className="mt-2 text-sm text-center text-gray-600">
+            {verificationMethod === 'email' 
+              ? `We've sent a 6-digit verification code to ${email}`
+              : `We've sent a 6-digit verification code to +91${phone}`
+            }
           </p>
         </div>
 

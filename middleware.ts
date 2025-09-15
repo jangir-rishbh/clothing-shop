@@ -9,8 +9,10 @@ const publicRoutes = [
   '/contact',
   '/login',
   '/signup',
+  '/phone-verification',
   '/_next',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/api/auth'
 ]
 
 export async function middleware(request: NextRequest) {

@@ -41,107 +41,42 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, otp, purpose } = requestBody;
-    console.log('Verification request details:', { 
-      email: email ? `${email.substring(0, 3)}...${email.split('@')[1] || ''}` : 'none',
-      otpLength: otp ? otp.length : 0,
-      purpose: purpose || 'not specified'
-    });
-
-    // Validate required fields
-    const missingFields = [];
-    if (!email) missingFields.push('email');
-    if (!otp) missingFields.push('OTP');
+    const { email, otp } = requestBody;
     
-    if (missingFields.length > 0) {
-      const errorMessage = `Missing required fields: ${missingFields.join(', ')}`;
-      console.error(errorMessage);
+    // Validate required fields
+    if (!email || !otp) {
       return NextResponse.json(
         { 
-          error: errorMessage,
-          code: 'MISSING_FIELDS',
-          missingFields
+          error: 'Email and OTP are required',
+          code: 'MISSING_FIELDS'
         },
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
+        { status: 400 }
       );
     }
-
-    // Clean up any expired OTPs first
-    const { error: cleanupError } = await supabaseAdmin
-      .from('otp_verifications')
-      .delete()
-      .lt('expires_at', new Date().toISOString());
-
-    if (cleanupError) {
-      console.error('Error cleaning up expired OTPs:', cleanupError);
-      // Continue execution as this is not a critical error
-    }
-
-    // First, get all OTPs for this email for debugging
-    const { data: allOtps } = await supabaseAdmin
-      .from('otp_verifications')
-      .select('*')
-      .eq('email', email);
-
-    console.log('Found OTPs for email:', {
-      count: allOtps?.length || 0,
-      otps: allOtps?.map(otp => ({
-        id: otp.id,
-        otp: `${otp.otp.substring(0, 2)}...`,
-        verified: otp.verified,
-        expires_at: otp.expires_at,
-        created_at: otp.created_at
-      }))
+    
+    console.log('Verification request details:', { 
+      email: `${email.substring(0, 3)}...${email.split('@')[1] || ''}`,
+      otpLength: otp.length
     });
 
-    // Then get the specific OTP
+    // Find the OTP record by email
     const { data: otpData, error: fetchError } = await supabaseAdmin
       .from('otp_verifications')
       .select('*')
-      .eq('email', email)
-      .eq('otp', otp)
-      .maybeSingle();
+      .eq('email', email.toLowerCase())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
 
-    if (fetchError) {
-      console.error('Error fetching OTP:', {
-        email,
-        otp: `${otp.substring(0, 2)}...`,
-        error: fetchError
-      });
-      
+    if (fetchError || !otpData) {
+      console.error('Error fetching OTP:', fetchError);
       return NextResponse.json(
         { 
-          error: 'An error occurred while verifying your OTP. Please try again.',
-          code: 'OTP_FETCH_ERROR',
+          error: 'No OTP found for this email address. Please request a new OTP.',
+          code: 'OTP_NOT_FOUND',
           details: fetchError?.message
         },
-        { 
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    if (!otpData) {
-      console.error('No matching OTP found:', {
-        email,
-        otp: `${otp.substring(0, 2)}...`
-      });
-      
-      return NextResponse.json(
-        { 
-          error: 'The OTP you entered is incorrect or has expired. Please request a new one.',
-          code: 'INVALID_OTP',
-          details: 'No matching OTP record found',
-          suggestion: 'Please request a new OTP if you haven\'t received one or if it has expired.'
-        },
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
+        { status: 400 }
       );
     }
 
@@ -151,7 +86,6 @@ export async function POST(request: Request) {
 
     console.log('OTP validation:', {
       storedOTP: `${otpData.otp.substring(0, 2)}...`,
-      verified: otpData.verified,
       expiresAt: otpData.expires_at,
       currentTime: now.toISOString(),
       isExpired,
@@ -164,7 +98,7 @@ export async function POST(request: Request) {
       const { error: deleteError } = await supabaseAdmin
         .from('otp_verifications')
         .delete()
-        .eq('email', email);
+        .eq('id', otpData.id);
       
       if (deleteError) {
         console.error('Error deleting expired OTP:', deleteError);
@@ -195,61 +129,55 @@ export async function POST(request: Request) {
       );
     }
 
-    // First, check if OTP is already verified
-    if (otpData.verified) {
-      console.log('OTP already verified at:', otpData.verified_at);
-      // Continue with the flow even if already verified
-    } else {
-      // Mark the OTP as verified and update the record
-      try {
-        // First try with the new schema that includes verified columns
-        const updateData = { 
-          verified: true, 
-          verified_at: new Date().toISOString(),
-          // Set a new expiration time for the verification (10 minutes from now)
-          expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString()
-        };
-        
-        console.log('Updating OTP with data:', updateData);
-        
-        const { error: updateError } = await supabaseAdmin
-          .from('otp_verifications')
-          .update(updateData)
-          .eq('id', otpData.id);
+    // Mark the OTP as verified and update the record
+    try {
+      const updateData = { 
+        verified: true, 
+        verified_at: new Date().toISOString(),
+        // Set a new expiration time for the verification (10 minutes from now)
+        expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString()
+      };
+      
+      console.log('Updating OTP with data:', updateData);
+      
+      const { error: updateError } = await supabaseAdmin
+        .from('otp_verifications')
+        .update(updateData)
+        .eq('id', otpData.id);
 
-        if (updateError) {
-          // If error is about missing columns, try with just the expiration update
-          if (updateError.message && updateError.message.includes("Could not find the 'verified' column")) {
-            console.warn('Verified column not found, falling back to expiration update only');
-            const fallbackUpdateData = {
-              expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString()
-            };
+      if (updateError) {
+        // If error is about missing columns, try with just the expiration update
+        if (updateError.message && updateError.message.includes("Could not find the 'verified' column")) {
+          console.warn('Verified column not found, falling back to expiration update only');
+          const fallbackUpdateData = {
+            expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString()
+          };
+          
+          const { error: fallbackError } = await supabaseAdmin
+            .from('otp_verifications')
+            .update(fallbackUpdateData)
+            .eq('id', otpData.id);
             
-            const { error: fallbackError } = await supabaseAdmin
-              .from('otp_verifications')
-              .update(fallbackUpdateData)
-              .eq('id', otpData.id);
-              
-            if (fallbackError) {
-              console.error('Error in fallback update:', fallbackError);
-              throw new Error(`Failed to update OTP: ${fallbackError.message}`);
-            }
-          } else {
-            console.error('Error updating OTP verification status:', updateError);
-            throw new Error(`Failed to update OTP verification status: ${updateError.message}`);
+          if (fallbackError) {
+            console.error('Error in fallback update:', fallbackError);
+            throw new Error(`Failed to update OTP: ${fallbackError.message}`);
           }
+        } else {
+          console.error('Error updating OTP verification status:', updateError);
+          throw new Error(`Failed to update OTP verification status: ${updateError.message}`);
         }
-        
-        console.log('Successfully updated OTP verification status');
-      } catch (updateError) {
-        console.error('Error in OTP verification update:', updateError);
-        throw new Error(`Failed to update OTP: ${updateError instanceof Error ? updateError.message : 'Unknown error'}`);
       }
+      
+      console.log('Successfully updated OTP verification status');
+    } catch (updateError) {
+      console.error('Error in OTP verification update:', updateError);
+      throw new Error(`Failed to update OTP: ${updateError instanceof Error ? updateError.message : 'Unknown error'}`);
     }
 
     console.log('OTP verified successfully for email:', email);
-    // Get the updated OTP record
-    const { data: updatedOtp } = await supabaseAdmin
+    
+    // Verify the OTP record was updated
+    await supabaseAdmin
       .from('otp_verifications')
       .select('*')
       .eq('id', otpData.id)
@@ -257,17 +185,18 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: 'OTP verified successfully',
+      message: 'Email verified successfully',
       verified: true,
-      otpId: otpData.id,
-      otpData: updatedOtp
+      email: email,
+      otpId: otpData.id
     });
   } catch (error) {
     console.error('Error in verify-otp:', error);
     return NextResponse.json(
       { 
         error: 'An error occurred while verifying your OTP. Please try again.',
-        code: 'VERIFICATION_ERROR'
+        code: 'VERIFICATION_ERROR',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, password, name, otp } = requestBody;
+    const { email, password, name, mobile, otp } = requestBody;
     console.log('Completing signup for email:', email);
 
     if (!email || !password || !name || !otp) {
@@ -98,13 +98,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    // Define UserData interface
+    interface UserData {
+      email: string;
+      password: string;
+      email_confirm: boolean;
+      user_metadata: {
+        name: string;
+        phone?: string;
+      };
+      phone?: string;
+    }
+
+    // Create user in Supabase Auth with phone number if provided
+    const userData: UserData = {
       email,
       password,
       email_confirm: true, // Mark email as confirmed since we verified via OTP
       user_metadata: { name },
-    });
+    };
+
+    // Add phone number if provided
+    if (mobile) {
+      userData.phone = `+91${mobile}`; // Assuming Indian numbers with +91 prefix
+    }
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser(userData);
 
     if (authError) {
       console.error('Error creating user:', authError);
@@ -121,6 +140,7 @@ export async function POST(request: Request) {
         id: authData.user.id,
         email,
         full_name: name,
+        phone: mobile ? `+91${mobile}` : null,
         updated_at: new Date().toISOString(),
       });
 
