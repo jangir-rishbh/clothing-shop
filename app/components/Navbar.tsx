@@ -41,11 +41,13 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/home" className="group relative flex-shrink-0">
               <div className="flex flex-col">
-                <span className="text-xl sm:text-2xl md:text-3xl font-serif italic font-bold text-gray-800 leading-tight">
-                  <span className="text-yellow-500">Ma Baba</span>
-                  <span className="text-gray-800 whitespace-nowrap"> Cloth Store</span>
+                <span className="text-2xl sm:text-3xl md:text-4xl font-serif font-black leading-tight">
+                  <span className="text-yellow-400 drop-shadow">Ma</span>
+                  <span className="text-white"> </span>
+                  <span className="text-white drop-shadow">Baba</span>
+                  <span className="text-white/80 text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap"> Cloth Store</span>
                 </span>
-                <span className="text-[10px] xs:text-xs sm:text-sm font-sans not-italic font-normal tracking-wider text-gray-600 mt-0 sm:mt-0.5">Elegant Clothing & Fashion</span>
+                <span className="text-[10px] xs:text-xs sm:text-sm font-sans font-semibold tracking-wider text-white/80 mt-0.5">Elegant Clothing & Fashion</span>
               </div>
             </Link>
           </div>

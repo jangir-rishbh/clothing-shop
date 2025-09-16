@@ -154,12 +154,6 @@ export default function HomePage() {
             <p className="text-white/80">Visit our store to explore our exclusive collection and enjoy personalized assistance from our fashion experts.</p>
           </div>
           
-          <div className="mt-16">
-            <p className="text-white/60 text-sm uppercase tracking-wider mb-4">Scroll to Explore</p>
-            <div className="w-8 h-12 border-2 border-white/30 rounded-full mx-auto relative">
-              <div className="w-1 h-2 bg-white/60 rounded-full absolute top-2 left-1/2 transform -translate-x-1/2 animate-bounce"></div>
-            </div>
-          </div>
         </div>
       </section>
 

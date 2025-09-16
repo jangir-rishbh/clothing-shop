@@ -82,7 +82,7 @@ export default function AboutPage() {
             <p className="mt-4 text-xl text-gray-600">The passionate people behind our success</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {/* Owner */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:-translate-y-2">
               <div className="h-64 bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center">
@@ -108,6 +108,20 @@ export default function AboutPage() {
                 <h3 className="text-xl font-semibold text-gray-900">Munesh Kumar</h3>
                 <p className="text-green-600 font-medium">Stock & Inventory</p>
                 <p className="mt-2 text-gray-600">Managing inventory, stock, and product procurement</p>
+              </div>
+            </div>
+
+            {/* Tailor */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:-translate-y-2">
+              <div className="h-64 bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
+                <svg className="h-32 w-32 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
+                </svg>
+              </div>
+              <div className="p-6 text-center">
+                <h3 className="text-xl font-semibold text-gray-900">Neetu Devi</h3>
+                <p className="text-amber-600 font-medium">Master Tailor</p>
+                <p className="mt-2 text-gray-600">Expert in custom tailoring and alterations with 15+ years of experience</p>
               </div>
             </div>
           </div>
