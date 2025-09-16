@@ -36,6 +36,11 @@ export default function ForgotPassword() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 404) {
+          // Show specific error for email not found
+          setMessage({ text: data.error || 'No account found with this email address', isError: true });
+          return;
+        }
         throw new Error(data.error || 'Failed to send OTP');
       }
 

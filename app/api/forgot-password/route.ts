@@ -27,10 +27,10 @@ export async function POST(request: Request) {
       .single();
 
     if (userError || !userData) {
-      // For security, don't reveal if email exists or not
+      // Return a specific status to indicate email not found
       return NextResponse.json(
-        { message: 'If an account with this email exists, a password reset OTP has been sent.' },
-        { status: 200 }
+        { error: 'No account found with this email address' },
+        { status: 404 }
       );
     }
 
