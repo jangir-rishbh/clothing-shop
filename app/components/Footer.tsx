@@ -15,9 +15,13 @@ export default function Footer() {
               <div className="text-sm font-sans tracking-widest text-gray-300 uppercase">Elegant Clothing & Fashion</div>
               <div className="w-16 h-0.5 bg-yellow-400 mt-3 mb-4"></div>
             </div>
-            <p className="text-gray-300">
+            <p className="text-gray-300 mb-3">
               We have all types of clothing available. We guarantee quality and affordable prices.
             </p>
+            <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-700 p-3 rounded">
+              <p className="font-medium">Special Notice:</p>
+              <p>We also provide professional tailoring services for all types of garments. Get your clothes stitched with perfect fit and style!</p>
+            </div>
           </div>
           <div>
             <h3 className="text-xl font-bold mb-4">Quick Links</h3>
