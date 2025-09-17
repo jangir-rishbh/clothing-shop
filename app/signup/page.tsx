@@ -6,9 +6,53 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
+type Gender = 'male' | 'female' | 'other' | '';
+
+const INDIAN_STATES = [
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry'
+].sort();
+
 type FormData = {
   email: string;
   name: string;
+  mobile: string;
+  gender: Gender;
+  state: string;
 };
 
 export default function SignupPage() {
@@ -19,7 +63,10 @@ export default function SignupPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     email: '',
-    name: ''
+    name: '',
+    mobile: '',
+    gender: '',
+    state: ''
   });
 
   // Check if user is already logged in
@@ -44,7 +91,7 @@ export default function SignupPage() {
     setSuccess('Sending verification email...');
 
     try {
-      // Validate name and email
+      // Validate form data
       if (!formData.name.trim()) {
         throw new Error('Name is required');
       }
@@ -52,12 +99,31 @@ export default function SignupPage() {
       if (!formData.email) {
         throw new Error('Email is required');
       }
+
+      if (!formData.mobile) {
+        throw new Error('Mobile number is required');
+      }
+
+      // Validate mobile number format (10 digits)
+      const mobileRegex = /^[0-9]{10}$/;
+      if (!mobileRegex.test(formData.mobile)) {
+        throw new Error('Please enter a valid 10-digit mobile number');
+      }
+
+      if (!formData.gender) {
+        throw new Error('Please select your gender');
+      }
+
+      if (!formData.state) {
+        throw new Error('Please select your state');
+      }
       
       // Prepare OTP request data
       const otpRequestData = {
         name: formData.name.trim(),
         purpose: 'signup_verification',
-        email: formData.email
+        email: formData.email,
+        mobile: formData.mobile
       };
 
       // Send OTP via email
@@ -78,7 +144,10 @@ export default function SignupPage() {
       // Store user data in session storage for after verification
       const userData = {
         email: formData.email,
-        name: formData.name.trim()
+        name: formData.name.trim(),
+        mobile: formData.mobile,
+        gender: formData.gender,
+        state: formData.state
       };
       sessionStorage.setItem('pendingUser', JSON.stringify(userData));
 
@@ -257,6 +326,91 @@ export default function SignupPage() {
                 transition={{ duration: 0.2 }}
               >
                 We&apos;ll send you a verification code to your email
+              </motion.p>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            >
+              <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-1">
+                Mobile Number
+              </label>
+              <motion.input
+                id="mobile"
+                name="mobile"
+                type="tel"
+                required
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Enter 10-digit mobile number"
+                value={formData.mobile}
+                onChange={handleChange}
+                maxLength={10}
+                pattern="[0-9]{10}"
+                whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
+              />
+              <motion.p 
+                className="mt-1 text-xs text-gray-500"
+                initial={{ opacity: 0.7 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                We&apos;ll use this for important account notifications
+              </motion.p>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+              className="mt-4"
+            >
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                Gender
+              </label>
+              <motion.select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={(e) => setFormData({...formData, gender: e.target.value as Gender})}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white"
+                required
+                whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </motion.select>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+              className="mt-4"
+            >
+              <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+                State/Union Territory
+              </label>
+              <motion.select
+                id="state"
+                name="state"
+                value={formData.state}
+                onChange={(e) => setFormData({...formData, state: e.target.value})}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white"
+                required
+                whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
+              >
+                <option value="">Select State/UT</option>
+                {INDIAN_STATES.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </motion.select>
+              <motion.p 
+                className="mt-1 text-xs text-gray-500"
+                initial={{ opacity: 0.7 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                Select your state or union territory
               </motion.p>
             </motion.div>
           </motion.div>
