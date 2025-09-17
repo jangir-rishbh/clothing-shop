@@ -83,7 +83,7 @@ const categories = [
 ];
 
 export default function HomePage() {
-  const {} = useAuth();
+  const { session } = useAuth();
   const searchParams = useSearchParams();
   const redirectedFrom = searchParams.get('redirectedFrom');
 
@@ -157,51 +157,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="relative py-20 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-mosaic.png')]"></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="inline-block text-yellow-400 text-sm font-semibold tracking-widest uppercase mb-3">Our Collections</span>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Discover Our Categories</h2>
-            <div className="w-20 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 mx-auto rounded-full"></div>
+      {/* Categories Section - visible only when logged in */}
+      {session && (
+        <section className="relative py-20 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-mosaic.png')]"></div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {categories.map((category, index) => (
-              <Link 
-                key={index} 
-                href={category.link} 
-                className="group relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:-translate-y-2"
-              >
-                <div className="relative h-80 overflow-hidden">
-                  <Image
-                    src={category.image}
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover transform group-hover:scale-110 transition-transform duration-700"
-                    priority={index < 3} // Preload first 3 images
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                  <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
-                    <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors duration-300">
-                      {category.name}
-                    </h3>
-                    <span className="text-white/80 text-sm font-medium group-hover:text-yellow-300 transition-colors duration-300">
-                      Explore Collection →
-                    </span>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <span className="inline-block text-yellow-400 text-sm font-semibold tracking-widest uppercase mb-3">Our Collections</span>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Discover Our Categories</h2>
+              <div className="w-20 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 mx-auto rounded-full"></div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {categories.map((category, index) => (
+                <Link 
+                  key={index} 
+                  href={category.link} 
+                  className="group relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:-translate-y-2"
+                >
+                  <div className="relative h-80 overflow-hidden">
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transform group-hover:scale-110 transition-transform duration-700"
+                      priority={index < 3} // Preload first 3 images
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
+                      <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-yellow-400 transition-colors duration-300">
+                        {category.name}
+                      </h3>
+                      <span className="text-white/80 text-sm font-medium group-hover:text-yellow-300 transition-colors duration-300">
+                        Explore Collection →
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="absolute inset-0 border-2 border-white/20 rounded-2xl pointer-events-none group-hover:border-yellow-400/50 transition-all duration-500"></div>
-              </Link>
-            ))}
+                  <div className="absolute inset-0 border-2 border-white/20 rounded-2xl pointer-events-none group-hover:border-yellow-400/50 transition-all duration-500"></div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Featured Products Section */}
       <section className="py-20 bg-white">
