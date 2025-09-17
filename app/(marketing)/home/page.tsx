@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useSearchParams } from "next/navigation";
-import ProductCard from "../components/ProductCard";
+import ProductCard from "@components/ProductCard";
 
 // Clothing collection with different categories
 const featuredProducts = [
