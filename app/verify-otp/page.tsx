@@ -108,10 +108,14 @@ export default function VerifyOtpPage() {
         throw new Error(data.error || 'Failed to verify OTP');
       }
 
-      // If this is a signup flow, show password form after OTP verification
+      // If this is a signup flow, and we already have password from the signup step, complete signup automatically
       if (pendingUser && pendingUser.name) {
-        setShowPasswordForm(true);
-        setSuccess('OTP verified! Please set your password.');
+        if (pendingUser.password) {
+          await completeSignup(pendingUser.password);
+        } else {
+          setShowPasswordForm(true);
+          setSuccess('OTP verified! Please set your password.');
+        }
       } else {
         setSuccess('Email verified successfully! Redirecting to login...');
         setTimeout(() => router.push('/login'), 2000);
@@ -120,6 +124,46 @@ export default function VerifyOtpPage() {
       const err = error as Error;
       console.error('OTP verification error:', error);
       setError(err.message || 'An error occurred while verifying your OTP. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Complete the signup using collected user data and a password
+  const completeSignup = async (passwordToUse: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser') || '{}');
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: pendingUser.email,
+          name: pendingUser.name,
+          mobile: pendingUser.mobile,
+          gender: pendingUser.gender,
+          state: pendingUser.state,
+          password: passwordToUse,
+          otp: otp
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create account');
+      }
+
+      setVerificationComplete(true);
+      setSuccess('Account created successfully! Redirecting to login...');
+      sessionStorage.removeItem('pendingUser');
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    } catch (error: Error | unknown) {
+      const err = error as Error;
+      console.error('Error creating account:', error);
+      setError(err.message || 'Failed to create account. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -196,58 +240,11 @@ export default function VerifyOtpPage() {
       setError('Password must be at least 6 characters long');
       return;
     }
-    
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Get the pending user data from session storage
-      const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser') || '{}');
-      
-      // Complete the signup with password and additional user data
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: pendingUser.email,
-          name: pendingUser.name,
-          mobile: pendingUser.mobile,
-          gender: pendingUser.gender,
-          state: pendingUser.state,
-          password: password,
-          otp: otp
-        })
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create account');
-      }
-      
-      setVerificationComplete(true);
-      setSuccess('Account created successfully! Redirecting to login...');
-      
-      // Clear session storage
-      sessionStorage.removeItem('pendingUser');
-      
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-      
-    } catch (error: Error | unknown) {
-      const err = error as Error;
-      console.error('Error creating account:', error);
-      setError(err.message || 'Failed to create account. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    await completeSignup(password);
   };
 
   // Render the component

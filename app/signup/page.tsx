@@ -68,6 +68,10 @@ export default function SignupPage() {
     gender: '',
     state: ''
   });
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -88,7 +92,7 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccess('Sending verification email...');
+    setSuccess('Validating details and sending verification email...');
 
     try {
       // Validate form data
@@ -116,6 +120,17 @@ export default function SignupPage() {
 
       if (!formData.state) {
         throw new Error('Please select your state');
+      }
+
+      // Validate password first (password-first flow)
+      if (!password) {
+        throw new Error('Password is required');
+      }
+      if (password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+      if (password !== confirmPassword) {
+        throw new Error('Passwords do not match');
       }
       
       // Prepare OTP request data
@@ -147,7 +162,8 @@ export default function SignupPage() {
         name: formData.name.trim(),
         mobile: formData.mobile,
         gender: formData.gender,
-        state: formData.state
+        state: formData.state,
+        password: password
       };
       sessionStorage.setItem('pendingUser', JSON.stringify(userData));
 
@@ -178,7 +194,7 @@ export default function SignupPage() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="max-w-md w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 transform transition-all duration-500 hover:shadow-3xl"
+        className="max-w-xl w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 transform transition-all duration-500 hover:shadow-3xl"
       >
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -278,12 +294,13 @@ export default function SignupPage() {
           transition={{ delay: 0.3 }}
         >
           <motion.div 
-            className="rounded-md shadow-sm space-y-4"
+            className="rounded-md shadow-sm grid grid-cols-2 gap-4"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
             <motion.div
+              className="col-span-1"
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
@@ -301,6 +318,7 @@ export default function SignupPage() {
               />
             </motion.div>
             <motion.div
+              className="md:col-span-1"
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
@@ -329,6 +347,7 @@ export default function SignupPage() {
               </motion.p>
             </motion.div>
             <motion.div
+              className="md:col-span-1"
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
@@ -358,9 +377,9 @@ export default function SignupPage() {
               </motion.p>
             </motion.div>
             <motion.div
+              className="col-span-1"
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              className="mt-4"
             >
               <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
                 Gender
@@ -381,9 +400,9 @@ export default function SignupPage() {
               </motion.select>
             </motion.div>
             <motion.div
+              className="md:col-span-1"
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              className="mt-4"
             >
               <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
                 State/Union Territory
@@ -412,6 +431,87 @@ export default function SignupPage() {
               >
                 Select your state or union territory
               </motion.p>
+            </motion.div>
+          </motion.div>
+
+          {/* Password Fields (Password-first flow) */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.45 }}
+            className="rounded-md shadow-sm grid grid-cols-2 gap-4"
+          >
+            <motion.div
+              className="col-span-1"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Create Password
+              </label>
+              <div className="relative">
+                <motion.input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={6}
+                  className="appearance-none relative block w-full pr-12 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Enter a secure password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 hover:text-gray-800"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <motion.p 
+                className="mt-1 text-xs text-gray-500"
+                initial={{ opacity: 0.7 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                Minimum 6 characters
+              </motion.p>
+            </motion.div>
+            <motion.div
+              className="col-span-1"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            >
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <motion.input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  minLength={6}
+                  className="appearance-none relative block w-full pr-12 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 hover:text-gray-800"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
             </motion.div>
           </motion.div>
 
@@ -445,7 +545,7 @@ export default function SignupPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  Continue with Email
+                  Continue to Verify Email
                 </motion.span>
               )}
             </motion.button>
