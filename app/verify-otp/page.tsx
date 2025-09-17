@@ -207,13 +207,16 @@ export default function VerifyOtpPage() {
       // Get the pending user data from session storage
       const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser') || '{}');
       
-      // Complete the signup with password
+      // Complete the signup with password and additional user data
       const response = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: pendingUser.email,
           name: pendingUser.name,
+          mobile: pendingUser.mobile,
+          gender: pendingUser.gender,
+          state: pendingUser.state,
           password: password,
           otp: otp
         })

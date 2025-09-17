@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -26,13 +27,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, password, name, mobile, otp } = requestBody;
+    const { email, password, name, mobile, gender, state, otp } = requestBody;
     console.log('Completing signup for email:', email);
 
-    if (!email || !password || !name || !otp) {
+    if (!email || !password || !name || !mobile || !gender || !state || !otp) {
       console.error('Missing required fields in request');
       return NextResponse.json(
-        { error: 'Email, password, name, and OTP are required' },
+        { 
+          error: 'All fields are required',
+          missing: {
+            email: !email,
+            password: !password,
+            name: !name,
+            mobile: !mobile,
+            gender: !gender,
+            state: !state,
+            otp: !otp
+          }
+        },
         { status: 400 }
       );
     }
@@ -98,59 +110,30 @@ export async function POST(request: Request) {
       );
     }
 
-    // Define UserData interface
-    interface UserData {
-      email: string;
-      password: string;
-      email_confirm: boolean;
-      user_metadata: {
-        name: string;
-        phone?: string;
-      };
-      phone?: string;
-    }
+    // Hash password and insert into custom users table (no Auth)
+    const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user in Supabase Auth with phone number if provided
-    const userData: UserData = {
-      email,
-      password,
-      email_confirm: true, // Mark email as confirmed since we verified via OTP
-      user_metadata: { name },
-    };
+    const { data: insertedUser, error: insertError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        email: email.toLowerCase(),
+        password_hash: passwordHash,
+        name,
+        mobile,
+        gender,
+        state,
+        email_verified_at: verifiedAt.toISOString(),
+      })
+      .select()
+      .single();
 
-    // Add phone number if provided
-    if (mobile) {
-      userData.phone = `+91${mobile}`; // Assuming Indian numbers with +91 prefix
-    }
-
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser(userData);
-
-    if (authError) {
-      console.error('Error creating user:', authError);
+    if (insertError) {
+      console.error('Error inserting user into users table:', insertError);
+      // Handle unique violation gracefully
+      const msg = insertError.code === '23505' ? 'This email is already registered' : 'Failed to create user account';
       return NextResponse.json(
-        { error: authError.message || 'Failed to create user account' },
+        { error: msg, details: insertError.message },
         { status: 400 }
-      );
-    }
-
-    // Create user profile in the database
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .upsert({
-        id: authData.user.id,
-        email,
-        full_name: name,
-        phone: mobile ? `+91${mobile}` : null,
-        updated_at: new Date().toISOString(),
-      });
-
-    if (profileError) {
-      console.error('Error creating user profile:', profileError);
-      // Try to clean up the auth user if profile creation fails
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      return NextResponse.json(
-        { error: 'Failed to create user profile' },
-        { status: 500 }
       );
     }
 
@@ -163,9 +146,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       message: 'User created successfully',
       user: {
-        id: authData.user.id,
-        email: authData.user.email,
-        name: authData.user.user_metadata?.name || name,
+        id: insertedUser.id,
+        email: insertedUser.email,
+        name: insertedUser.name || name,
       }
     });
 

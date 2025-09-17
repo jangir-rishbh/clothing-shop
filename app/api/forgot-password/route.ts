@@ -21,9 +21,9 @@ export async function POST(request: Request) {
 
     // Check if user exists
     const { data: userData, error: userError } = await supabase
-      .from('profiles')
+      .from('users')
       .select('id, email')
-      .eq('email', email)
+      .eq('email', email.toLowerCase())
       .single();
 
     if (userError || !userData) {
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       .from('otp_verifications')
       .upsert(
         {
-          email,
+          email: email.toLowerCase(),
           otp,
           expires_at: expiresAt.toISOString(),
           verified: false,

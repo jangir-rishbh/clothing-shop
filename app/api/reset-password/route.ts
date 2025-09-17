@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
     const { data: otpData, error: otpError } = await supabase
       .from('otp_verifications')
       .select('*')
-      .eq('email', email)
+      .eq('email', email.toLowerCase())
       .eq('otp', otp)
       .gt('expires_at', new Date().toISOString())
       .single();
@@ -40,38 +41,40 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get user from auth.users table
-    const { data: { users }, error: userError } = await supabase.auth.admin.listUsers();
-    const user = users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+    // Get user from custom users table
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('email', email.toLowerCase())
+      .single();
 
     if (userError || !user) {
-      console.error('Error fetching user:', userError);
       return NextResponse.json(
         { message: 'User not found' },
         { status: 400 }
       );
     }
 
-    // Mark OTP as used
-    await supabase
-      .from('otp_verifications')
-      .update({ 
-        verified: true, 
-        verified_at: new Date().toISOString(),
-        user_id: user.id // Ensure user_id is set to the correct UUID
-      })
-      .eq('id', otpData.id);
-
-    // Update user's password using the user ID from auth.users
-    const { error: updateUserError } = await supabase.auth.admin.updateUserById(
-      user.id,
-      { password: newPassword }
-    );
+    // Hash new password and update users table
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const { error: updateUserError } = await supabase
+      .from('users')
+      .update({ password_hash: passwordHash, updated_at: new Date().toISOString() })
+      .eq('id', user.id);
 
     if (updateUserError) {
       console.error('Error updating password:', updateUserError);
       throw new Error('Failed to update password');
     }
+
+    // Mark OTP as used and/or clean up
+    await supabase
+      .from('otp_verifications')
+      .update({ 
+        verified: true, 
+        verified_at: new Date().toISOString()
+      })
+      .eq('id', otpData.id);
 
     return NextResponse.json(
       { message: 'Password has been reset successfully' },

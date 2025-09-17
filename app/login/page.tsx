@@ -15,7 +15,7 @@ type FormData = {
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signIn, session } = useAuth();
+  const { session, signIn } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,9 +60,10 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        // Sign in with email and password
         const { error } = await signIn(formData.email, formData.password);
-        if (error) throw error;
+        if (error) {
+          throw new Error(typeof error === 'string' ? error : 'Invalid email or password');
+        }
         router.push(redirectTo);
       } else {
         // For signup, first validate name and email

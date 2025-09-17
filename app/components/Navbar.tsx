@@ -77,7 +77,7 @@ export default function Navbar() {
                   >
                     <span className="sr-only">Open user menu</span>
                     <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold">
-                      {session.user?.email?.[0]?.toUpperCase() || 'U'}
+                      {(session.name?.[0] || session.email?.[0] || 'U').toUpperCase()}
                     </div>
                   </button>
 
@@ -99,7 +99,7 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              ) : (
+                ) : (
                 <div className="flex items-center space-x-2">
                   <Link 
                     href="/login" 
@@ -158,15 +158,15 @@ export default function Navbar() {
               </Link>
               
               {!loading && (
-                session ? (
+              session ? (
                   <div className="pt-4 pb-3 border-t border-white/20 mt-4">
                     <div className="flex items-center px-4">
                       <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold text-lg">
-                        {session.user?.email?.[0]?.toUpperCase() || 'U'}
+                        {session.email?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div className="ml-3">
                         <div className="text-base font-medium text-white truncate max-w-[200px]">
-                          {session.user?.email}
+                          {session.name || session.email}
                         </div>
                       </div>
                     </div>

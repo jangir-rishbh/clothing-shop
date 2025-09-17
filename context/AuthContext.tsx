@@ -1,11 +1,13 @@
+
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { Session } from '@supabase/supabase-js';
+
+type CustomUser = { id: string; email: string; name?: string; mobile?: string | null; gender?: string | null; state?: string | null } | null;
 
 type AuthContextType = {
-  session: Session | null;
+  session: CustomUser;
   loading: boolean;
   supabase: typeof supabase;
   signUp: (email: string, password: string, name: string) => Promise<{
@@ -22,79 +24,51 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<CustomUser>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set initial session
-    const setInitialSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setLoading(false);
-    };
-    
-    setInitialSession();
-
-    // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
-      setSession(session);
-      setLoading(false);
-      
-      // Handle specific auth events
-      if (event === 'SIGNED_IN') {
-        // Force a session refresh to ensure consistency
-        const { data: { session: newSession } } = await supabase.auth.getSession();
-        setSession(newSession);
+    const init = async () => {
+      try {
+        const resp = await fetch('/api/me', { cache: 'no-store' });
+        const data = await resp.json();
+        setSession(data.user);
+        try {
+          if (data.user) localStorage.setItem('custom_user', JSON.stringify(data.user));
+          else localStorage.removeItem('custom_user');
+        } catch {}
+      } catch {
+        // Fallback to localStorage
+        try {
+          const raw = localStorage.getItem('custom_user');
+          if (raw) setSession(JSON.parse(raw));
+        } catch {}
+      } finally {
+        setLoading(false);
       }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
     };
+    init();
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
-        },
-        emailRedirectTo: `${window.location.origin}/home`,
-      },
-    });
-
-    if (!error && data.user) {
-      // Create a profile for the user
-      await supabase
-        .from('profiles')
-        .upsert({
-          id: data.user.id,
-          email: email,
-          full_name: name,
-          updated_at: new Date().toISOString(),
-        });
-    }
-
-    return { data, error };
+    // Optional: Keep for compatibility or refactor to custom signup later
+    return { data: null, error: null };
   };
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const resp = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
       });
-
-      if (!error && data.session) {
-        // Ensure session is properly set
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
+      const result = await resp.json();
+      if (!resp.ok) {
+        return { data: null, error: result.error || 'Invalid credentials' };
       }
-
-      return { data, error };
+      try { localStorage.setItem('custom_user', JSON.stringify(result.user)); } catch {}
+      setSession(result.user);
+      return { data: result, error: null };
     } catch (error) {
       console.error('Sign in error:', error);
       return { data: null, error };
@@ -103,9 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      // Clear the session after sign out
+      await fetch('/api/logout', { method: 'POST' });
+      try { localStorage.removeItem('custom_user'); } catch {}
       setSession(null);
     } catch (error) {
       console.error('Error signing out:', error);
