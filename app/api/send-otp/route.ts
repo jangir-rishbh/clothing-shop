@@ -42,6 +42,38 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    
+    // If this OTP request is for signup, ensure email is NOT already registered
+    try {
+      if ((purpose || '').toString().toLowerCase().includes('signup')) {
+        const { data: existingUser, error: userCheckError } = await supabaseAdmin
+          .from('users')
+          .select('id')
+          .eq('email', String(email).toLowerCase())
+          .maybeSingle();
+
+        if (userCheckError) {
+          console.error('Error checking existing user by email:', userCheckError);
+          return NextResponse.json(
+            { error: 'Server error while checking email' },
+            { status: 500 }
+          );
+        }
+
+        if (existingUser) {
+          return NextResponse.json(
+            { error: 'This email is already registered. Please log in instead.' },
+            { status: 400 }
+          );
+        }
+      }
+    } catch (checkErr) {
+      console.error('Unexpected error during email existence check:', checkErr);
+      return NextResponse.json(
+        { error: 'Server error while checking email' },
+        { status: 500 }
+      );
+    }
 
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
