@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       .from('users')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', admin!.id)
-      .select('id, email, name, mobile, gender, state, role')
+      .select('id, email, name, mobile, gender, state, role, is_banned')
       .single();
 
     if (error) {
