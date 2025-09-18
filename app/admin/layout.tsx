@@ -18,6 +18,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <Link className="block hover:underline" href="/admin/profile">My Profile</Link>
           <Link className="block hover:underline" href="/admin/users">Users</Link>
           <Link className="block hover:underline" href="/admin/products">Products</Link>
+          <Link className="block hover:underline" href="/admin/massage">massage</Link>
         </nav>
       </aside>
       <main className="p-6">

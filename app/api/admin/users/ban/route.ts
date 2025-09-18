@@ -20,17 +20,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'You cannot ban yourself' }, { status: 400 });
     }
 
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase env missing for ban route:', { hasUrl: !!supabaseUrl, hasServiceKey: !!supabaseServiceKey });
+      return NextResponse.json({ error: 'Server not configured (Supabase env missing)' }, { status: 500 });
+    }
+
     const { error } = await supabaseAdmin
       .from('users')
       .update({ is_banned: ban, updated_at: new Date().toISOString() })
       .eq('id', userId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error banning user:', error);
+      throw error;
+    }
 
     return NextResponse.json({ message: ban ? 'User banned' : 'User unbanned' });
   } catch (e: unknown) {
     const status = e instanceof Response ? e.status : 500;
-    const msg = status === 401 ? 'Not authenticated' : status === 403 ? 'Access denied' : 'Server error';
-    return NextResponse.json({ error: msg }, { status });
+    const generic = status === 401 ? 'Not authenticated' : status === 403 ? 'Access denied' : 'Server error';
+    const message = e instanceof Error ? e.message : generic;
+    return NextResponse.json({ error: message }, { status });
   }
 }

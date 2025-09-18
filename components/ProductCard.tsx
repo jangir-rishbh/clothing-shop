@@ -2,20 +2,35 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiHeart, FiShoppingCart, FiEye, FiShare2 } from "react-icons/fi";
 
 interface ProductCardProps {
   id: string;
   name: string;
   price: number;
-  image: string;
+  image: string; // kept for API compatibility
   category: string;
 }
 
-export default function ProductCard({ id, name, price, image, category }: ProductCardProps) {
+export default function ProductCard({ id, name, price, category }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
+  const [overrideUrl, setOverrideUrl] = useState<string | null>(null);
+  const placeholder = 'https://placehold.co/800x600?text=No+Image';
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const resp = await fetch('/api/products/overrides', { cache: 'no-store' });
+        const data = await resp.json();
+        const found = (data.overrides || []).find((o: { product_id: string; image?: string }) => o.product_id === id);
+        if (mounted) setOverrideUrl(found?.image || null);
+      } catch {}
+    })();
+    return () => { mounted = false; };
+  }, [id]);
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,7 +52,7 @@ export default function ProductCard({ id, name, price, image, category }: Produc
         {/* Product Image */}
         <div className="relative h-80 w-full overflow-hidden">
           <Image 
-            src={image} 
+            src={overrideUrl || placeholder} 
             alt={name}
             fill
             style={{ objectFit: "cover" }}
@@ -151,7 +166,7 @@ export default function ProductCard({ id, name, price, image, category }: Produc
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="relative h-96 bg-gray-100 rounded-lg overflow-hidden">
                   <Image 
-                    src={image}
+                    src={overrideUrl || placeholder}
                     alt={name}
                     fill
                     style={{ objectFit: 'cover' }}

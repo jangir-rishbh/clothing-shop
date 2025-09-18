@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductById } from "@/data/products";
@@ -7,7 +8,7 @@ type PageProps = {
   params: { id: string };
 };
 
-export default function ProductDetailPage({ params }: PageProps) {
+export default async function ProductDetailPage({ params }: PageProps) {
   const product = getProductById(params.id);
 
   if (!product) {
@@ -18,6 +19,18 @@ export default function ProductDetailPage({ params }: PageProps) {
   const reviews = product.reviewsCount ?? 0;
   const colors = product.variants?.colors ?? [];
   const sizes = product.variants?.sizes ?? [];
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  let overrideImage: string | null = null;
+  const placeholder = 'https://placehold.co/1200x900?text=No+Image';
+  if (supabaseUrl && supabaseKey) {
+    try {
+      const sb = createClient(supabaseUrl, supabaseKey, { auth: { autoRefreshToken: false, persistSession: false } });
+      const { data } = await sb.from('product_overrides').select('image').eq('product_id', product.id).single();
+      overrideImage = (data && typeof (data as { image?: string }).image === 'string') ? (data as { image?: string }).image! : null;
+    } catch {}
+  }
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -42,7 +55,7 @@ export default function ProductDetailPage({ params }: PageProps) {
           {/* Left: Image */}
           <div className="relative bg-white rounded-2xl shadow-sm overflow-hidden min-h-[420px]">
             <Image
-              src={product.image}
+              src={overrideImage || placeholder}
               alt={product.name}
               fill
               className="object-cover"
