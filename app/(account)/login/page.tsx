@@ -60,11 +60,16 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
+        const { error, data } = await signIn(formData.email, formData.password);
         if (error) {
           throw new Error(typeof error === 'string' ? error : 'Invalid email or password');
         }
-        router.push(redirectTo);
+        const role = data?.user?.role || 'user';
+        if (role === 'admin') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push(redirectTo);
+        }
       } else {
         // For signup, first validate name and email
         if (!formData.name.trim()) {

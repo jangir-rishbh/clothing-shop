@@ -41,6 +41,32 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
+  // Admin-only protection using custom session cookie
+  if (pathname.startsWith('/admin')) {
+    const token = request.cookies.get('session')?.value || ''
+    let role: string | null = null
+    if (token) {
+      const [data] = token.split('.')
+      if (data) {
+        try {
+          // Convert base64url to base64
+          let b64 = data.replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          if (pad) b64 += '='.repeat(4 - pad);
+          const json = atob(b64);
+          const parsed = JSON.parse(json as string)
+          role = parsed?.role ?? null
+        } catch {}
+      }
+    }
+    if (role !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('redirectedFrom', pathname)
+      return NextResponse.redirect(url)
+    }
+  }
+
   // Initialize Supabase client
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

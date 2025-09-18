@@ -123,6 +123,7 @@ export async function POST(request: Request) {
         gender,
         state,
         email_verified_at: verifiedAt.toISOString(),
+        role: 'user',
       })
       .select()
       .single();
@@ -149,6 +150,7 @@ export async function POST(request: Request) {
         id: insertedUser.id,
         email: insertedUser.email,
         name: insertedUser.name || name,
+        role: insertedUser.role || 'user',
       }
     });
 

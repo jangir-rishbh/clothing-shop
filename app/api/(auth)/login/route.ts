@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Find user in custom users table
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, password_hash, name, mobile, gender, state')
+      .select('id, email, password_hash, name, mobile, gender, state, role')
       .eq('email', String(email).toLowerCase())
       .single();
 
@@ -51,8 +51,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Issue session cookie
-    const token = signSession({ uid: user.id, email: user.email });
+    // Issue session cookie including role
+    const token = signSession({ uid: user.id, email: user.email, role: (user as { role?: 'admin' | 'user' }).role || 'user' });
     const res = NextResponse.json({
       message: 'Login successful',
       user: {
@@ -62,6 +62,7 @@ export async function POST(request: Request) {
         mobile: user.mobile,
         gender: user.gender,
         state: user.state,
+        role: (user as { role?: 'admin' | 'user' }).role || 'user',
       },
     });
     res.cookies.set('session', token, {
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
     return res;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Error in login:', err);
     return NextResponse.json(
       { error: 'An error occurred during login' },

@@ -4,7 +4,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
-type CustomUser = { id: string; email: string; name?: string; mobile?: string | null; gender?: string | null; state?: string | null } | null;
+type CustomUser = { id: string; email: string; name?: string; mobile?: string | null; gender?: string | null; state?: string | null; role?: 'admin' | 'user' } | null;
 
 type AuthContextType = {
   session: CustomUser;

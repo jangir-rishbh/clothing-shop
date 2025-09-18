@@ -5,6 +5,7 @@ const SECRET = process.env.SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_K
 export type SessionPayload = {
   uid: string;
   email: string;
+  role: 'admin' | 'user';
   exp: number; // epoch seconds
 };
 
