@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ProfilePage() {
@@ -31,8 +32,16 @@ export default function ProfilePage() {
         </div>
 
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6 bg-gray-50">
+          <div className="px-4 py-5 sm:px-6 bg-gray-50 flex items-center justify-between">
             <h3 className="text-lg leading-6 font-medium text-gray-900">Profile Information</h3>
+            {session.role === 'admin' ? (
+              <Link
+                href="/admin/profile"
+                className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+              >
+                Update Profile
+              </Link>
+            ) : null}
           </div>
           <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
             <dl className="sm:divide-y sm:divide-gray-200">
