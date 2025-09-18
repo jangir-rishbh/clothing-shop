@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "@components/ProductCard";
+import { useState, useEffect as useEffect2 } from "react";
 
 // Clothing collection with different categories
 const featuredProducts = [
@@ -86,6 +87,7 @@ export default function HomePage() {
   const { session } = useAuth();
   const searchParams = useSearchParams();
   const redirectedFrom = searchParams.get('redirectedFrom');
+  const [custom, setCustom] = useState<Array<{ id: string; name: string; price: number; image?: string | null; category?: string | null }>>([]);
 
   useEffect(() => {
     if (redirectedFrom) {
@@ -95,6 +97,19 @@ export default function HomePage() {
       window.history.replaceState({}, '', newUrl.toString());
     }
   }, [redirectedFrom]);
+
+  useEffect2(() => {
+    (async () => {
+      try {
+        const resp = await fetch('/api/products/custom', { cache: 'no-store' });
+        const data: { products?: Array<{ id: string; name: string; price: number | string; image?: string | null; category?: string | null }> } = await resp.json();
+        if (resp.ok) {
+          const list = (data.products || []).map(p => ({ id: String(p.id), name: String(p.name), price: Number(p.price), image: p.image || null, category: p.category || 'Custom' }));
+          setCustom(list);
+        }
+      } catch {}
+    })();
+  }, []);
 
   return (
     <div className="overflow-x-hidden">
@@ -215,7 +230,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
+            {[...custom.map((p) => ({ id: p.id, name: p.name, price: Number(p.price), image: p.image || '', category: p.category || 'Custom' })), ...featuredProducts].map((product) => (
               <div key={product.id} className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-pink-500 rounded-2xl opacity-0 group-hover:opacity-75 blur transition-all duration-300 group-hover:duration-200"></div>
                 <div className="relative h-full bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
