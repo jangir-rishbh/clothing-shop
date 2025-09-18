@@ -116,9 +116,6 @@ export default function ProductCard({ id, name, price, image, category }: Produc
             </div>
             <div className="ml-4 text-right">
               <p className="text-lg font-bold text-gray-900">{formatPrice(price)}</p>
-              {price > 1999 && (
-                <p className="text-xs text-green-600">Free Shipping</p>
-              )}
             </div>
           </div>
           

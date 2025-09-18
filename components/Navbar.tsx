@@ -31,6 +31,7 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', href: '/home' },
     { name: 'About Us', href: '/about' },
+    { name: 'Catagory', href: '/category' },
     { name: 'Contact', href: '/contact' },
   ];
 
@@ -148,6 +149,13 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 ℹ️ About Us
+              </Link>
+              <Link
+                href="/category"
+                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                🗂️ Catagory
               </Link>
               <Link
                 href="/contact"
