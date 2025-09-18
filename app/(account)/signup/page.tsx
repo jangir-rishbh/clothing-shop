@@ -347,7 +347,7 @@ export default function SignupPage() {
           transition={{ delay: 0.3 }}
         >
           <motion.div 
-            className="rounded-md shadow-sm grid grid-cols-2 gap-4"
+            className="rounded-md shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
@@ -502,7 +502,7 @@ export default function SignupPage() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.45 }}
-            className="rounded-md shadow-sm grid grid-cols-2 gap-4"
+            className="rounded-md shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             <motion.div
               className="col-span-1"
