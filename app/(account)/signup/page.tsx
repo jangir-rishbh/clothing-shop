@@ -1,12 +1,28 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import type { CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type Gender = 'male' | 'female' | 'other' | '';
+
+type Bubble = {
+  left: string;
+  size: string;
+  duration: string;
+  delay: string;
+  scale: string;
+};
+
+type CSSVars = {
+  ['--left']?: string;
+  ['--size']?: string;
+  ['--duration']?: string;
+  ['--scale']?: string;
+};
 
 const INDIAN_STATES = [
   'Andhra Pradesh',
@@ -72,6 +88,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [bubbles, setBubbles] = useState<Bubble[]>([]);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -79,6 +96,26 @@ export default function SignupPage() {
       router.push('/home');
     }
   }, [session, router]);
+
+  // Generate bubbles once on mount (client-only)
+  useEffect(() => {
+    const count = 18;
+    const items: Bubble[] = Array.from({ length: count }).map(() => {
+      const left = `${Math.floor(Math.random() * 100)}%`;
+      const sizePx = 18 + Math.floor(Math.random() * 28); // 18-46px (bigger bubbles)
+      const durationSec = 12 + Math.floor(Math.random() * 12); // 12-24s
+      const delaySec = Math.floor(Math.random() * 12); // 0-12s
+      const scale = (0.8 + Math.random() * 0.8).toFixed(2); // 0.8-1.6
+      return {
+        left,
+        size: `${sizePx}px`,
+        duration: `${durationSec}s`,
+        delay: `${delaySec}s`,
+        scale: `${scale}`,
+      };
+    });
+    setBubbles(items);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -190,11 +227,27 @@ export default function SignupPage() {
       transition={{ duration: 0.5 }}
       className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600"
     >
+      {/* Floating bubbles background layer */}
+      <div className="bubble-layer" aria-hidden="true">
+        {bubbles.map((b, i) => (
+          <span
+            key={i}
+            className="bubble"
+            style={{
+              ['--left']: b.left,
+              ['--size']: b.size,
+              ['--duration']: b.duration,
+              ['--scale']: b.scale,
+              animationDelay: b.delay,
+            } as CSSProperties & CSSVars}
+          />
+        ))}
+      </div>
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="max-w-xl w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 transform transition-all duration-500 hover:shadow-3xl"
+        className="relative z-10 max-w-xl w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 transform transition-all duration-500 hover:shadow-3xl"
       >
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -384,20 +437,30 @@ export default function SignupPage() {
               <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
                 Gender
               </label>
-              <motion.select
-                id="gender"
-                name="gender"
-                value={formData.gender}
-                onChange={(e) => setFormData({...formData, gender: e.target.value as Gender})}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white"
-                required
-                whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </motion.select>
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                  <span className="text-lg leading-none select-none" aria-hidden={formData.gender === ''} aria-label={formData.gender || 'gender'}>
+                    {formData.gender === 'male' && '👱‍♂️'}
+                    {formData.gender === 'female' && '👱‍♀️'}
+                    {formData.gender === 'other' && '⚧️'}
+                    {formData.gender === '' && '⚧️'}
+                  </span>
+                </div>
+                <motion.select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value as Gender})}
+                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white"
+                  required
+                  whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">👱‍♂️ Male</option>
+                  <option value="female">👱‍♀️ Female</option>
+                  <option value="other">⚧️ Other</option>
+                </motion.select>
+              </div>
             </motion.div>
             <motion.div
               className="md:col-span-1"

@@ -13,6 +13,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{success: boolean; message: string} | null>(null);
+  const maxMessageLength = 500;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
@@ -109,7 +110,7 @@ export default function ContactPage() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <div className="inline-block transform transition-all duration-500 hover:scale-105">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-pink-500">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-pink-500">
               Get in Touch
             </h1>
             <div className="w-32 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 mx-auto my-6 rounded-full"></div>
@@ -273,10 +274,13 @@ export default function ContactPage() {
                         id="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                        className="w-full pl-11 pr-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
                         placeholder="John"
                         required
                       />
+                      <div className="pointer-events-none absolute left-3 top-[37px] text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/></svg>
+                      </div>
                       <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                     </div>
                     <div className="relative group">
@@ -287,10 +291,13 @@ export default function ContactPage() {
                         id="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                        className="w-full pl-11 pr-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
                         placeholder="Doe"
                         required
                       />
+                      <div className="pointer-events-none absolute left-3 top-[37px] text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/></svg>
+                      </div>
                       <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                     </div>
                   </div>
@@ -303,10 +310,13 @@ export default function ContactPage() {
                       id="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                      className="w-full pl-11 pr-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
                       placeholder="your@email.com"
                       required
                     />
+                    <div className="pointer-events-none absolute left-3 top-[37px] text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 13.5L2 6h20l-10 7.5z"/><path d="M2 6v12h20V6l-10 7.5L2 6z"/></svg>
+                    </div>
                     <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                   </div>
                   
@@ -318,9 +328,12 @@ export default function ContactPage() {
                       id="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
+                      className="w-full pl-11 pr-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
                       placeholder="+1 (555) 123-4567"
                     />
+                    <div className="pointer-events-none absolute left-3 top-[37px] text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.72 11.72 0 003.68.59 1 1 0 011 1V20a2 2 0 01-2 2A18 18 0 012 6a2 2 0 012-2h3.47a1 1 0 011 1 11.72 11.72 0 00.59 3.68 1 1 0 01-.24 1.01l-2.2 2.2z"/></svg>
+                    </div>
                     <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                   </div>
                   
@@ -332,10 +345,12 @@ export default function ContactPage() {
                       rows={4}
                       value={formData.message}
                       onChange={handleChange}
+                      maxLength={maxMessageLength}
                       className="w-full px-4 py-3 bg-white rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-300 transition-all duration-300 group-hover:border-yellow-300"
                       placeholder="How can we help you?"
                       required
                     ></textarea>
+                    <div className="mt-1 text-right text-xs text-gray-400">{formData.message.length}/{maxMessageLength}</div>
                     <div className="absolute inset-0 rounded-xl pointer-events-none border-2 border-transparent group-hover:border-yellow-400/20 transition-all duration-300"></div>
                   </div>
                   
