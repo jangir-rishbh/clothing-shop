@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const cookie = request.headers.get('cookie') || '';
     const match = cookie.match(/(?:^|; )session=([^;]+)/);
     const token = match ? decodeURIComponent(match[1]) : '';
-    const payload = token ? verifySession(token) : null;
+    const payload = token ? await verifySession(token) : null;
 
     if (!payload) {
       return NextResponse.json({ user: null }, { status: 200 });
@@ -22,11 +22,16 @@ export async function GET(request: Request) {
 
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, name, mobile, gender, state, role')
+      .select('id, email, name, mobile, gender, state, role, is_banned')
       .eq('id', payload.uid)
       .single();
 
     if (error || !user) {
+      return NextResponse.json({ user: null }, { status: 200 });
+    }
+
+    // Check if user is banned - return null user if banned
+    if (user.is_banned) {
       return NextResponse.json({ user: null }, { status: 200 });
     }
 

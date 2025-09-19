@@ -166,7 +166,7 @@ export default function AdminProductsPage() {
               <div className="text-gray-900 mb-2">₹{p.price}</div>
               <div className="mb-2 relative w-full h-40">
                 <Image
-                  src={(overrides[p.id]?.image && overrides[p.id]?.image!.length > 0) ? overrides[p.id]!.image! : (p.image && p.image.length > 0 ? p.image : 'https://placehold.co/800x600?text=No+Image')}
+                  src={(overrides[p.id]?.image && overrides[p.id]?.image!.length > 0) ? overrides[p.id]!.image! : (p.image && p.image.length > 0 ? p.image : 'https://placehold.co/800x600/png?text=No+Image')}
                   alt={p.name}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

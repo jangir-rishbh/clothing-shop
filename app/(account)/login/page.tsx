@@ -41,6 +41,13 @@ export default function LoginPage() {
 
   // Check for redirect URL
   const redirectTo = searchParams.get('redirectedFrom') || '/home';
+  
+  // Check if user was redirected due to being banned
+  useEffect(() => {
+    if (searchParams.get('banned') === 'true') {
+      setError('Your account has been banned. Please contact support for assistance.');
+    }
+  }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -120,6 +127,8 @@ export default function LoginPage() {
       } else if (errorMessage.includes('already registered')) {
         setError('This email is already registered. Please log in instead.');
         setIsLogin(true);
+      } else if (errorMessage.includes('banned')) {
+        setError('Your account has been banned. Please contact support for assistance.');
       } else {
         setError(errorMessage);
       }

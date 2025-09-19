@@ -1,5 +1,5 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { verifySession } from '@/lib/session'
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -41,98 +41,61 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Admin-only protection using custom session cookie
-  if (pathname.startsWith('/admin')) {
-    const token = request.cookies.get('session')?.value || ''
-    let role: string | null = null
-    if (token) {
-      const [data] = token.split('.')
-      if (data) {
-        try {
-          // Convert base64url to base64
-          let b64 = data.replace(/-/g, '+').replace(/_/g, '/');
-          const pad = b64.length % 4;
-          if (pad) b64 += '='.repeat(4 - pad);
-          const json = atob(b64);
-          const parsed = JSON.parse(json as string)
-          role = parsed?.role ?? null
-        } catch {}
-      }
-    }
-    if (role !== 'admin') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      url.searchParams.set('redirectedFrom', pathname)
-      return NextResponse.redirect(url)
+  // Check custom session for all protected routes
+  const sessionToken = request.cookies.get('session')?.value || ''
+  let sessionPayload: any = null
+  
+  if (sessionToken) {
+    try {
+      sessionPayload = await verifySession(sessionToken)
+    } catch {
+      // Invalid session token
     }
   }
 
-  // Initialize Supabase client
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          // Set the cookie in the response
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          // Remove the cookie from the response
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
-    }
-  )
+  // Admin-only protection will be validated via /api/me below
 
-  // Check if user is authenticated
-  const { data: { session } } = await supabase.auth.getSession()
+  // Check if user is banned (for all protected routes)
+  if (sessionPayload && !pathname.startsWith('/login') && !pathname.startsWith('/signup')) {
+    try {
+      // Make a request to check if user is banned
+      const checkResponse = await fetch(`${request.nextUrl.origin}/api/me`, {
+        headers: {
+          'Cookie': request.headers.get('cookie') || ''
+        }
+      })
+      
+      const checkData = await checkResponse.json()
+      
+      // If user is banned (me API returns null user), redirect to login with banned message
+      if (!checkData.user && sessionPayload) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        url.searchParams.set('banned', 'true')
+        return NextResponse.redirect(url)
+      }
+
+      // Enforce admin access using live role from /api/me
+      if (pathname.startsWith('/admin')) {
+        if (!checkData.user || checkData.user.role !== 'admin') {
+          const url = request.nextUrl.clone()
+          url.pathname = '/login'
+          url.searchParams.set('redirectedFrom', pathname)
+          return NextResponse.redirect(url)
+        }
+      }
+    } catch {
+      // If check fails, continue normally
+    }
+  }
 
   // If no session and trying to access protected route, redirect to login
-  if (!session && !publicRoutes.some(route => pathname.startsWith(route))) {
+  if (!sessionPayload && !publicRoutes.some(route => pathname.startsWith(route))) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('redirectedFrom', pathname)
     return NextResponse.redirect(url)
   }
-
-  // If user is authenticated, set the session in the response
-  if (session) {
-    response.headers.set('x-supabase-auth', 'true')
-  }
-
-  return response
 
   return response
 }

@@ -23,7 +23,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
   let overrideImage: string | null = null;
-  const placeholder = 'https://placehold.co/1200x900?text=No+Image';
+  const placeholder = 'https://placehold.co/1200x900/png?text=No+Image';
   if (supabaseUrl && supabaseKey) {
     try {
       const sb = createClient(supabaseUrl, supabaseKey, { auth: { autoRefreshToken: false, persistSession: false } });

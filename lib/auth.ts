@@ -22,7 +22,7 @@ export async function getCurrentUserFromCookie(): Promise<CurrentUser> {
   const store = await cookies();
   const token = store.get('session')?.value;
   if (!token) return null;
-  const payload = verifySession(token);
+  const payload = await verifySession(token);
   if (!payload) return null;
 
   const { data: user } = await supabaseAdmin
@@ -53,9 +53,9 @@ export async function requireAdmin(): Promise<CurrentUser> {
   return user;
 }
 
-export function extractSessionFromRequestCookie(req: Request): SessionPayload | null {
+export async function extractSessionFromRequestCookie(req: Request): Promise<SessionPayload | null> {
   const cookie = req.headers.get('cookie') || '';
   const match = cookie.match(/(?:^|; )session=([^;]+)/);
   const token = match ? decodeURIComponent(match[1]) : '';
-  return token ? verifySession(token) : null;
+  return token ? await verifySession(token) : null;
 }

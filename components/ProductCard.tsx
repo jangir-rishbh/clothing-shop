@@ -17,7 +17,7 @@ export default function ProductCard({ id, name, price, category }: ProductCardPr
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
   const [overrideUrl, setOverrideUrl] = useState<string | null>(null);
-  const placeholder = 'https://placehold.co/800x600?text=No+Image';
+  const placeholder = 'https://placehold.co/800x600/png?text=No+Image';
 
   useEffect(() => {
     let mounted = true;

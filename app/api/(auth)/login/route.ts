@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Find user in custom users table
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, password_hash, name, mobile, gender, state, role')
+      .select('id, email, password_hash, name, mobile, gender, state, role, is_banned')
       .eq('email', String(email).toLowerCase())
       .single();
 
@@ -42,6 +42,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check if user is banned
+    if (user.is_banned) {
+      return NextResponse.json(
+        { error: 'Your account has been banned. Please contact support for assistance.' },
+        { status: 403 }
+      );
+    }
+
     // Compare password
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) {
@@ -52,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     // Issue session cookie including role
-    const token = signSession({ uid: user.id, email: user.email, role: (user as { role?: 'admin' | 'user' }).role || 'user' });
+    const token = await signSession({ uid: user.id, email: user.email, role: (user as { role?: 'admin' | 'user' }).role || 'user' });
     const res = NextResponse.json({
       message: 'Login successful',
       user: {
