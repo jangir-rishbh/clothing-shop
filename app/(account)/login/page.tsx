@@ -27,9 +27,7 @@ export default function LoginPage() {
     otp: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showOtpField, setShowOtpField] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [otpSent, setOtpSent] = useState(false);
 
   // Check if user is already logged in
@@ -67,16 +65,19 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        const { error, data } = await signIn(formData.email, formData.password);
+        const { error, data } = await signIn(formData.email, formData.password, showOtpField ? formData.otp : undefined);
         if (error) {
           throw new Error(typeof error === 'string' ? error : 'Invalid email or password');
         }
-        const role = data?.user?.role || 'user';
-        if (role === 'admin') {
-          router.push('/admin/dashboard');
-        } else {
-          router.push(redirectTo);
+        // If server requires OTP (admin flow), show OTP field and stop here
+        if (data?.requiresOtp) {
+          setOtpSent(true);
+          setShowOtpField(true);
+          setSuccess('OTP sent to your email. Please enter it to continue.');
+          return;
         }
+        const role = data?.user?.role || 'user';
+        if (role === 'admin') router.push('/admin/dashboard'); else router.push(redirectTo);
       } else {
         // For signup, first validate name and email
         if (!formData.name.trim()) {
@@ -257,7 +258,7 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            {!isLogin && showOtpField && (
+            {showOtpField && (
               <div>
                 <label htmlFor="otp" className="sr-only">OTP</label>
                 <input
@@ -266,7 +267,7 @@ export default function LoginPage() {
                   type="text"
                   inputMode="numeric"
                   pattern="\d{6}"
-                  required
+                  required={showOtpField}
                   className="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm"
                   placeholder="Enter 6-digit OTP"
                   value={formData.otp}
@@ -300,15 +301,7 @@ export default function LoginPage() {
               disabled={loading}
               className={`group relative w-full flex justify-center py-3 px-4 border-0 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {loading ? (
-                <span>Processing...</span>
-              ) : isLogin ? (
-                'Sign in'
-              ) : otpSent ? (
-                'Complete Sign Up'
-              ) : (
-                'Send OTP'
-              )}
+              {loading ? 'Processing...' : isLogin ? (showOtpField ? 'Verify & Sign in' : 'Sign in') : (otpSent ? 'Complete Sign Up' : 'Send OTP')}
             </button>
           </div>
         </form>

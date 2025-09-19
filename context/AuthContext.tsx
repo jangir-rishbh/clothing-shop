@@ -14,7 +14,7 @@ type AuthContextType = {
     error: any;
     data: any;
   }>;
-  signIn: (email: string, password: string) => Promise<{
+  signIn: (email: string, password: string, otp?: string) => Promise<{
     error: any;
     data: any;
   }>;
@@ -55,16 +55,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { data: null, error: null };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, otp?: string) => {
     try {
       const resp = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, otp })
       });
       const result = await resp.json();
       if (!resp.ok) {
         return { data: null, error: result.error || 'Invalid credentials' };
+      }
+      // If server indicates OTP step is required, do not set session yet
+      if (result.requiresOtp) {
+        return { data: result, error: null };
       }
       try { localStorage.setItem('custom_user', JSON.stringify(result.user)); } catch {}
       setSession(result.user);
