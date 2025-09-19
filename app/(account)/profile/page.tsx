@@ -34,14 +34,22 @@ export default function ProfilePage() {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:px-6 bg-gray-50 flex items-center justify-between">
             <h3 className="text-lg leading-6 font-medium text-gray-900">Profile Information</h3>
-            {session.role === 'admin' ? (
+            <div className="flex space-x-3">
               <Link
-                href="/admin/profile"
-                className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+                href="/messages"
+                className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
               >
-                Update Profile
+                Messages
               </Link>
-            ) : null}
+              {session.role === 'admin' ? (
+                <Link
+                  href="/admin/profile"
+                  className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+                >
+                  Update Profile
+                </Link>
+              ) : null}
+            </div>
           </div>
           <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
             <dl className="sm:divide-y sm:divide-gray-200">

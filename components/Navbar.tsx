@@ -31,7 +31,6 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', href: '/home' },
     { name: 'About Us', href: '/about' },
-    { name: 'Catagory', href: '/category' },
     { name: 'Contact', href: '/contact' },
   ];
 
@@ -90,6 +89,13 @@ export default function Navbar() {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         Your Profile
+                      </Link>
+                      <Link 
+                        href="/messages" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Messages
                       </Link>
                       <button
                         onClick={handleLogout}
@@ -151,13 +157,6 @@ export default function Navbar() {
                 ℹ️ About Us
               </Link>
               <Link
-                href="/category"
-                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                🗂️ Catagory
-              </Link>
-              <Link
                 href="/contact"
                 className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
@@ -185,6 +184,13 @@ export default function Navbar() {
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Your Profile
+                      </Link>
+                      <Link
+                        href="/messages"
+                        className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Messages
                       </Link>
                       <button
                         onClick={() => {
