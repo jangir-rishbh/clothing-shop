@@ -39,22 +39,20 @@ export default function Navbar() {
     : baseNavItems;
 
   return (
-    <nav className="bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between h-16 md:h-20">
           <div className="flex items-center">
-            {pathname !== '/home' && (
-              <button
-                onClick={() => router.back()}
-                className="mr-2 md:mr-3 p-2 rounded-full text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white"
-                aria-label="Go back"
-                title="Back"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
-            )}
+            <button
+              onClick={() => router.back()}
+              className={`mr-2 md:mr-3 p-2 rounded-full text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white ${pathname === '/home' ? 'invisible' : ''}`}
+              aria-label="Go back"
+              title="Back"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
             <Link href="/home" className="group relative flex-shrink-0">
               <div className="flex flex-col">
                 <span className="text-2xl sm:text-3xl md:text-4xl font-serif font-black leading-tight">

@@ -207,21 +207,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Account Information Display */}
-              <div className="border-t border-gray-200 pt-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Account Information</h4>
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Email Address</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{session.email}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Account Type</dt>
-                    <dd className="mt-1 text-sm text-gray-900 capitalize">{session.role || 'User'}</dd>
-                  </div>
-                </dl>
-              </div>
-
               <div className="flex justify-end space-x-3 pt-6">
                 <button
                   onClick={() => router.back()}
