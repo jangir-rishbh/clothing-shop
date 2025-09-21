@@ -11,6 +11,7 @@ export default function Navbar() {
   const { session, signOut, loading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const isAdmin = !loading && session?.role === 'admin';
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -35,7 +36,11 @@ export default function Navbar() {
     { name: 'Contact', href: '/contact' },
   ];
   const navItems = (!loading && session)
-    ? [...baseNavItems, { name: 'Messages', href: '/messages' }]
+    ? [
+        ...baseNavItems,
+        { name: 'Messages', href: '/messages' },
+        ...(isAdmin ? [{ name: 'Admin Profile', href: '/admin/profile' }] : []),
+      ]
     : baseNavItems;
 
   return (
@@ -87,23 +92,25 @@ export default function Navbar() {
                 <div className="relative ml-4">
                   <button 
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white"
+                    className={`flex items-center text-sm ${isAdmin ? 'rounded-md' : 'rounded-full'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white`}
                   >
                     <span className="sr-only">Open user menu</span>
-                    <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold">
+                    <div className={`h-8 w-8 ${isAdmin ? 'rounded-md' : 'rounded-full'} bg-white flex items-center justify-center text-purple-600 font-semibold`}>
                       {(session.name?.[0] || session.email?.[0] || 'U').toUpperCase()}
                     </div>
                   </button>
 
                   {isUserMenuOpen && (
                     <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                      <Link 
-                        href="/profile" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        Your Profile
-                      </Link>
+                      {!isAdmin && (
+                        <Link 
+                          href="/profile" 
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          Your Profile
+                        </Link>
+                      )}
                       <Link 
                         href="/settings" 
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -186,12 +193,21 @@ export default function Navbar() {
                   💬 Messages
                 </Link>
               )}
+              {isAdmin && (
+                <Link
+                  href="/admin/profile"
+                  className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  🛡️ Admin Profile
+                </Link>
+              )}
               
               {!loading && (
               session ? (
                   <div className="pt-4 pb-3 border-t border-white/20 mt-4">
                     <div className="flex items-center px-4">
-                      <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold text-lg">
+                      <div className={`h-12 w-12 ${isAdmin ? 'rounded-md' : 'rounded-full'} bg-white flex items-center justify-center text-purple-600 font-semibold text-lg`}>
                         {session.email?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div className="ml-3">
@@ -201,13 +217,15 @@ export default function Navbar() {
                       </div>
                     </div>
                     <div className="mt-3 space-y-1">
-                      <Link
-                        href="/profile"
-                        className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Your Profile
-                      </Link>
+                      {!isAdmin && (
+                        <Link
+                          href="/profile"
+                          className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          Your Profile
+                        </Link>
+                      )}
                       <Link
                         href="/settings"
                         className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
