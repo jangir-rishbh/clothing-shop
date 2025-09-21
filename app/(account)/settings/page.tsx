@@ -11,6 +11,10 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [name, setName] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [gender, setGender] = useState<string | null>(null);
+  const [userState, setUserState] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !session) {
@@ -18,6 +22,10 @@ export default function SettingsPage() {
     }
     if (session) {
       setTwoFactorEnabled(session.two_factor_enabled || false);
+      setName(session.name || '');
+      setMobile(session.mobile || '');
+      setGender(session.gender || null);
+      setUserState(session.state || null);
     }
   }, [session, loading, router]);
 
@@ -57,6 +65,35 @@ export default function SettingsPage() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const resp = await fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name?.trim() || '',
+          mobile: mobile?.trim() || null,
+          gender: gender || null,
+          state: userState || null,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data?.error || 'Update failed');
+      }
+      setSuccess('Profile updated successfully');
+      await refreshSession();
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to update profile';
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -82,6 +119,64 @@ export default function SettingsPage() {
             )}
 
             <div className="space-y-6">
+              {/* Profile Details Form */}
+              <div className="p-4 border border-gray-200 rounded-lg bg-white">
+                <h4 className="text-lg font-medium text-gray-900 mb-4">Profile Details</h4>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Mobile</label>
+                    <input
+                      type="tel"
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                      placeholder="e.g. 9876543210"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Gender</label>
+                    <select
+                      value={gender || ''}
+                      onChange={(e) => setGender(e.target.value || null)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    >
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">State</label>
+                    <input
+                      type="text"
+                      value={userState || ''}
+                      onChange={(e) => setUserState(e.target.value || null)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                      placeholder="Your state"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </div>
               {/* Two-Factor Authentication Toggle */}
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="flex-1">

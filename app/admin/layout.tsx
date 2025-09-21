@@ -15,7 +15,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <h1 className="text-xl font-semibold">Admin Panel</h1>
         <nav className="space-y-2">
           <Link className="block hover:underline" href="/admin/dashboard">Dashboard</Link>
-          <Link className="block hover:underline" href="/admin/profile">My Profile</Link>
           <Link className="block hover:underline" href="/admin/users">Users</Link>
           <Link className="block hover:underline" href="/admin/products">Products</Link>
           <Link className="block hover:underline" href="/admin/massage">massage</Link>
@@ -24,9 +23,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <main className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div />
-          <Link href="/admin/profile" className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
-            Edit My Profile
-          </Link>
         </div>
         {children}
       </main>

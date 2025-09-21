@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Fragment } from 'react';
 
 type ContactMessage = {
   id: number | string;
@@ -128,8 +128,8 @@ export default function AdminMassagePage() {
 						</thead>
 						<tbody className="bg-white divide-y divide-gray-200">
 							{filtered.map(m => (
-								<>
-									<tr key={m.id} className={replyingTo === m.id ? 'bg-blue-50' : ''}>
+								<Fragment key={m.id}>
+									<tr className={replyingTo === m.id ? 'bg-blue-50' : ''}>
 										<td className="px-4 py-2 text-gray-900">{m.first_name} {m.last_name}</td>
 										<td className="px-4 py-2 text-gray-900">{m.email}</td>
 										<td className="px-4 py-2 text-gray-900">{m.phone || '-'}</td>
@@ -171,7 +171,7 @@ export default function AdminMassagePage() {
 										</td>
 									</tr>
 									{replyingTo === m.id && (
-										<tr>
+									<tr key={`${m.id}-reply`}>
 											<td colSpan={7} className="px-4 py-4 bg-blue-50">
 												<div className="space-y-2">
 													<textarea
@@ -202,9 +202,9 @@ export default function AdminMassagePage() {
 												</div>
 											</td>
 										</tr>
-									)}
-								</>
-							))}
+								)}
+							</Fragment>
+						))}
 							{filtered.length === 0 && (
 								<tr>
 									<td className="px-4 py-6 text-center text-gray-500" colSpan={7}>No messages</td>

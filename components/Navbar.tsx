@@ -217,13 +217,6 @@ export default function Navbar() {
                       >
                         Settings
                       </Link>
-                      <Link
-                        href="/messages"
-                        className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Messages
-                      </Link>
                       <button
                         onClick={() => {
                           handleLogout();
