@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     // Find user in custom users table
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, password_hash, name, mobile, gender, state, role, is_banned, email_verified_at')
+      .select('id, email, password_hash, name, mobile, gender, state, role, is_banned, email_verified_at, two_factor_enabled')
       .eq('email', String(email).toLowerCase())
       .single();
 
@@ -73,13 +73,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Admin: enforce OTP step before issuing session
-    if (userRole === 'admin') {
-      // If OTP not provided, generate and email it, then return requiresOtp
+    // Check if 2FA is enabled for this user
+    const twoFactorEnabled = (user as { two_factor_enabled?: boolean }).two_factor_enabled !== false;
+    
+    // If 2FA is enabled, enforce OTP step before issuing session
+    if (twoFactorEnabled) {
       if (!otp) {
+        // If OTP not provided, generate and email it, then return requiresOtp
         const generatedOtp = generateSixDigitOtp();
 
-        // Upsert OTP record with purpose 'admin_login'
+        // Upsert OTP record with purpose 'login_verification'
         const expiresAtISO = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         const { data: existingOtp } = await supabaseAdmin
           .from('otp_verifications')
@@ -92,7 +95,7 @@ export async function POST(request: Request) {
           otp: generatedOtp,
           expires_at: expiresAtISO,
           created_at: new Date().toISOString(),
-          purpose: 'admin_login'
+          purpose: 'login_verification'
         } as const;
 
         if (existingOtp) {
@@ -110,7 +113,7 @@ export async function POST(request: Request) {
         try {
           await sendOtpEmail(user.email, generatedOtp);
         } catch (e) {
-          console.error('Failed to send admin login OTP email:', e);
+          console.error('Failed to send login OTP email:', e);
           return NextResponse.json(
             { error: 'Failed to send OTP. Please try again later.' },
             { status: 500 }
@@ -119,7 +122,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
           requiresOtp: true,
-          message: 'OTP sent to your email for admin login verification.'
+          message: 'OTP sent to your email for login verification.'
         });
       } else {
         // OTP provided: verify it
@@ -156,8 +159,8 @@ export async function POST(request: Request) {
           );
         }
 
-        // Optional: verify purpose matches admin_login
-        // if (otpData.purpose && otpData.purpose !== 'admin_login') { ... }
+        // Optional: verify purpose matches login_verification
+        // if (otpData.purpose && otpData.purpose !== 'login_verification') { ... }
 
         // Consume OTP (delete it)
         await supabaseAdmin.from('otp_verifications').delete().eq('id', otpData.id);

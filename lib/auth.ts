@@ -16,6 +16,7 @@ export type CurrentUser = {
   gender?: string | null;
   state?: string | null;
   role: 'admin' | 'user';
+  two_factor_enabled?: boolean;
 } | null;
 
 export async function getCurrentUserFromCookie(): Promise<CurrentUser> {
@@ -27,7 +28,7 @@ export async function getCurrentUserFromCookie(): Promise<CurrentUser> {
 
   const { data: user } = await supabaseAdmin
     .from('users')
-    .select('id, email, name, mobile, gender, state, role')
+    .select('id, email, name, mobile, gender, state, role, two_factor_enabled')
     .eq('id', payload.uid)
     .single();
   if (!user) return null;
@@ -39,6 +40,7 @@ export async function getCurrentUserFromCookie(): Promise<CurrentUser> {
     gender: user.gender,
     state: user.state,
     role: (user as { role?: 'admin' | 'user' }).role || 'user',
+    two_factor_enabled: (user as { two_factor_enabled?: boolean }).two_factor_enabled,
   };
 }
 

@@ -4,7 +4,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
-type CustomUser = { id: string; email: string; name?: string; mobile?: string | null; gender?: string | null; state?: string | null; role?: 'admin' | 'user' } | null;
+type CustomUser = { id: string; email: string; name?: string; mobile?: string | null; gender?: string | null; state?: string | null; role?: 'admin' | 'user'; two_factor_enabled?: boolean } | null;
 
 type AuthContextType = {
   session: CustomUser;
@@ -19,6 +19,7 @@ type AuthContextType = {
     data: any;
   }>;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,6 +91,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshSession = async () => {
+    try {
+      const resp = await fetch('/api/me', { cache: 'no-store' });
+      const data = await resp.json();
+      setSession(data.user);
+      try {
+        if (data.user) localStorage.setItem('custom_user', JSON.stringify(data.user));
+        else localStorage.removeItem('custom_user');
+      } catch {}
+    } catch (error) {
+      console.error('Error refreshing session:', error);
+    }
+  };
+
   const value = {
     session,
     loading,
@@ -97,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signIn,
     signOut,
+    refreshSession,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

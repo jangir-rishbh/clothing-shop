@@ -91,6 +91,13 @@ export default function Navbar() {
                         Your Profile
                       </Link>
                       <Link 
+                        href="/settings" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Settings
+                      </Link>
+                      <Link 
                         href="/messages" 
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsUserMenuOpen(false)}
@@ -184,6 +191,13 @@ export default function Navbar() {
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Your Profile
+                      </Link>
+                      <Link
+                        href="/settings"
+                        className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Settings
                       </Link>
                       <Link
                         href="/messages"

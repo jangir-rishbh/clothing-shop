@@ -1,83 +1,58 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { verifySession } from '@/lib/session';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 
 export async function POST(request: Request) {
   try {
-    const { id, full_name } = await request.json();
-    const authHeader = request.headers.get('Authorization');
+    const { name, mobile, gender, state, two_factor_enabled } = await request.json();
     
-    if (!id) {
+    // Get the current session using custom session system
+    const cookie = request.headers.get('cookie') || '';
+    const match = cookie.match(/(?:^|; )session=([^;]+)/);
+    const token = match ? decodeURIComponent(match[1]) : '';
+    const payload = token ? await verifySession(token) : null;
+    
+    if (!payload) {
       return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
+        { error: 'Not authenticated' },
+        { status: 401 }
       );
     }
 
-    const supabase = createRouteHandlerClient({ cookies });
-    
-    // If we have an auth header, use it to set the session
-    if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      const { data, error } = await supabase.auth.getUser(token);
-      
-      if (error || !data.user) {
-        return NextResponse.json(
-          { error: 'Invalid or expired token' },
-          { status: 401 }
-        );
-      }
-      
-      // Verify the user ID matches
-      if (data.user.id !== id) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 403 }
-        );
-      }
-    } else {
-      // Fallback to session check if no auth header
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        return NextResponse.json(
-          { error: 'Not authenticated' },
-          { status: 401 }
-        );
-      }
+    const updates: Record<string, string | null | boolean> = {};
+    if (typeof name === 'string') updates.name = name.trim();
+    if (typeof mobile === 'string' || mobile === null) updates.mobile = mobile?.trim() || null;
+    if (typeof gender === 'string' || gender === null) updates.gender = gender?.trim() || null;
+    if (typeof state === 'string' || state === null) updates.state = state?.trim() || null;
+    if (typeof two_factor_enabled === 'boolean') updates.two_factor_enabled = two_factor_enabled;
 
-      if (session.user.id !== id) {
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 403 }
-        );
-      }
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
     }
-    
-    // Update the user's metadata
-    const { data: userData, error: userError } = await supabase.auth.updateUser({
-      data: { full_name }
-    });
 
-    if (userError) throw userError;
-
-    // Update the profiles table
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id,
-        full_name,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
+    // Update the users table
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', payload.uid)
+      .select('id, email, name, mobile, gender, state, role, is_banned, two_factor_enabled')
       .single();
 
-    if (profileError) throw profileError;
+    if (error) {
+      console.error('Profile update error:', error);
+      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+    }
 
     return NextResponse.json({
       message: 'Profile updated successfully',
-      user: userData.user,
-      profile: profileData
+      user: data
     });
 
   } catch (error: unknown) {

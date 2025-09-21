@@ -86,9 +86,15 @@ input:focus, textarea:focus {
   box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.3);
 }
 
-/* Smooth transitions */
-* {
+/* Smooth transitions - exclude form inputs to prevent visibility issues */
+*:not(input):not(textarea):not(select) {
   transition: all 0.3s ease;
+}
+
+/* Ensure input text is visible */
+input, textarea, select {
+  color: #111827 !important;
+  background-color: #ffffff !important;
 }
 
 /* Floating bubbles background */

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, name, mobile, gender, state, role, is_banned')
+      .select('id, email, name, mobile, gender, state, role, is_banned, two_factor_enabled')
       .eq('id', payload.uid)
       .single();
 
