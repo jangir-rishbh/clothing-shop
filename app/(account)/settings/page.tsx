@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useI18n } from '@/context/I18nContext';
+import type { Locale } from '@/context/I18nContext';
 
 export default function SettingsPage() {
   const { session, loading, refreshSession } = useAuth();
   const router = useRouter();
+  const { t, locale, setLocale } = useI18n();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -98,7 +101,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900">Settings</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900">{t('settings')}</h1>
           <p className="mt-2 text-sm text-gray-600">Manage your account security and preferences</p>
         </div>
 
@@ -119,6 +122,22 @@ export default function SettingsPage() {
             )}
 
             <div className="space-y-6">
+              {/* Language Preference */}
+              <div className="p-4 border border-gray-200 rounded-lg bg-white">
+                <h4 className="text-lg font-medium text-gray-900 mb-2">{t('language')}</h4>
+                <p className="text-sm text-gray-600 mb-4">Choose your preferred website language.</p>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={locale}
+                    onChange={(e) => setLocale(e.target.value as Locale)}
+                    className="mt-1 block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                    aria-label={t('language')}
+                  >
+                    <option value="en">{t('english')}</option>
+                    <option value="hi">{t('hindi')}</option>
+                  </select>
+                </div>
+              </div>
               {/* Profile Details Form */}
               <div className="p-4 border border-gray-200 rounded-lg bg-white">
                 <h4 className="text-lg font-medium text-gray-900 mb-4">Profile Details</h4>
@@ -212,7 +231,7 @@ export default function SettingsPage() {
                   onClick={() => router.back()}
                   className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                 >
-                  Back
+                  {t('back')}
                 </button>
                 <button
                   onClick={() => router.push('/profile')}

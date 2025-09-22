@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
+import { useI18n } from "@/context/I18nContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = !loading && session?.role === 'admin';
+  const { t } = useI18n();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -31,15 +33,15 @@ export default function Navbar() {
 
   // Navigation items
   const baseNavItems = [
-    { name: 'Home', href: '/home' },
-    { name: 'About Us', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+    { key: 'home', href: '/home' },
+    { key: 'about', href: '/about' },
+    { key: 'contact', href: '/contact' },
   ];
   const navItems = (!loading && session)
     ? [
         ...baseNavItems,
-        { name: 'Messages', href: '/messages' },
-        ...(isAdmin ? [{ name: 'Admin Profile', href: '/admin/profile' }] : []),
+        { key: 'messages', href: '/messages' },
+        ...(isAdmin ? [{ key: 'adminProfile', href: '/admin/profile' }] : []),
       ]
     : baseNavItems;
 
@@ -51,8 +53,8 @@ export default function Navbar() {
             <button
               onClick={() => router.back()}
               className={`mr-2 md:mr-3 p-2 rounded-full text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white ${pathname === '/home' ? 'invisible' : ''}`}
-              aria-label="Go back"
-              title="Back"
+              aria-label={t('back')}
+              title={t('back')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -72,7 +74,7 @@ export default function Navbar() {
                     <span className="text-white drop-shadow">Baba</span>
                     <span className="text-white/80 text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap"> Cloth Store</span>
                   </span>
-                  <span className="text-[10px] xs:text-xs sm:text-sm font-sans font-semibold tracking-wider text-white/80 mt-0.5">Elegant Clothing & Fashion</span>
+                  <span className="text-[10px] xs:text-xs sm:text-sm font-sans font-semibold tracking-wider text-white/80 mt-0.5">{t('brandTagline')}</span>
                 </div>
               </div>
             </Link>
@@ -90,7 +92,7 @@ export default function Navbar() {
                     : 'text-white hover:bg-white/10'
                 }`}
               >
-                {item.name}
+                {t(item.key)}
               </Link>
             ))}
             
@@ -101,7 +103,7 @@ export default function Navbar() {
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className={`flex items-center text-sm ${isAdmin ? 'rounded-md' : 'rounded-full'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white`}
                   >
-                    <span className="sr-only">Open user menu</span>
+                    <span className="sr-only">{t('openUserMenu')}</span>
                     <div className={`h-8 w-8 ${isAdmin ? 'rounded-md' : 'rounded-full'} bg-white flex items-center justify-center text-purple-600 font-semibold`}>
                       {(session.name?.[0] || session.email?.[0] || 'U').toUpperCase()}
                     </div>
@@ -115,7 +117,7 @@ export default function Navbar() {
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
-                          Your Profile
+                          {t('yourProfile')}
                         </Link>
                       )}
                       <Link 
@@ -123,13 +125,13 @@ export default function Navbar() {
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        Settings
+                        {t('settings')}
                       </Link>
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        Sign out
+                        {t('signOut')}
                       </button>
                     </div>
                   )}
@@ -140,13 +142,13 @@ export default function Navbar() {
                     href="/login" 
                     className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
                   >
-                    Login
+                    {t('login')}
                   </Link>
                   <Link
                     href="/signup"
                     className="px-4 py-2 bg-white text-purple-600 rounded-md hover:bg-gray-100 transition-colors"
                   >
-                    Sign Up
+                    {t('signup')}
                   </Link>
                 </div>
               )
@@ -160,13 +162,13 @@ export default function Navbar() {
               <button 
                 onClick={() => setIsMenuOpen(false)}
                 className="flex items-center text-white p-2 rounded-full hover:bg-white/10"
-                aria-label="Close menu"
+                aria-label={t('closeMenu')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </button>
-              <h3 className="text-lg font-semibold text-white">Menu</h3>
+              <h3 className="text-lg font-semibold text-white">{t('menu')}</h3>
               <div className="w-10"></div> {/* Spacer for alignment */}
             </div>
             <div className="px-6 pt-4 pb-8 space-y-3 h-[calc(100%-64px)] overflow-y-auto">
@@ -175,21 +177,21 @@ export default function Navbar() {
                 className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
               >
-                🏠 Home
+                {t('mobileHome')}
               </Link>
               <Link
                 href="/about"
                 className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
               >
-                ℹ️ About Us
+                {t('mobileAbout')}
               </Link>
               <Link
                 href="/contact"
                 className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                 onClick={() => setIsMenuOpen(false)}
               >
-                📞 Contact
+                {t('mobileContact')}
               </Link>
               {(!loading && session) && (
                 <Link
@@ -197,7 +199,7 @@ export default function Navbar() {
                   className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  💬 Messages
+                  {t('mobileMessages')}
                 </Link>
               )}
               {isAdmin && (
@@ -206,7 +208,7 @@ export default function Navbar() {
                   className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  🛡️ Admin Profile
+                  {t('mobileAdminProfile')}
                 </Link>
               )}
               
@@ -230,7 +232,7 @@ export default function Navbar() {
                           className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          Your Profile
+                          {t('yourProfile')}
                         </Link>
                       )}
                       <Link
@@ -238,7 +240,7 @@ export default function Navbar() {
                         className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        Settings
+                        {t('settings')}
                       </Link>
                       <button
                         onClick={() => {
@@ -247,7 +249,7 @@ export default function Navbar() {
                         }}
                         className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
                       >
-                        Sign out
+                        {t('signOut')}
                       </button>
                     </div>
                   </div>
@@ -258,14 +260,14 @@ export default function Navbar() {
                       className="block w-full px-4 py-3 text-center text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Login
+                      {t('login')}
                     </Link>
                     <Link
                       href="/signup"
                       className="block w-full px-4 py-3 text-center text-base font-medium text-purple-600 bg-white rounded-lg hover:bg-gray-100 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Sign Up
+                      {t('signup')}
                     </Link>
                   </div>
                 )
@@ -278,7 +280,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`inline-flex items-center justify-center p-3 rounded-full ${isMenuOpen ? 'bg-white/20' : 'bg-white/10 hover:bg-white/20'} focus:outline-none transition-colors`}
-              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-label={isMenuOpen ? t('closeMenu') : t('openMenu')}
             >
               <svg
                 className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}

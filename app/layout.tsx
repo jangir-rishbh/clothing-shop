@@ -5,6 +5,7 @@ import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import MarqueeBanner from "@components/MarqueeBanner";
+import { I18nProvider } from "@/context/I18nContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,14 +34,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
-        <AuthProvider>
-          <MarqueeBanner />
-          <Navbar />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <Footer />
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <MarqueeBanner />
+            <Navbar />
+            <main className="min-h-screen">
+              {children}
+            </main>
+            <Footer />
+          </AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );
