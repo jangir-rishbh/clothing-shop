@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "Ma Baba Cloth Store",
   description: "Your trusted local clothing store for quality garments at affordable prices",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
     apple: "/apple-touch-icon.png",
   },
 };
