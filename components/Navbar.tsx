@@ -59,14 +59,21 @@ export default function Navbar() {
               </svg>
             </button>
             <Link href="/home" className="group relative flex-shrink-0">
-              <div className="flex flex-col">
-                <span className="text-2xl sm:text-3xl md:text-4xl font-serif font-black leading-tight">
-                  <span className="text-yellow-400 drop-shadow">Ma</span>
-                  <span className="text-white"> </span>
-                  <span className="text-white drop-shadow">Baba</span>
-                  <span className="text-white/80 text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap"> Cloth Store</span>
-                </span>
-                <span className="text-[10px] xs:text-xs sm:text-sm font-sans font-semibold tracking-wider text-white/80 mt-0.5">Elegant Clothing & Fashion</span>
+              <div className="flex items-center">
+                <div className="mr-3 relative">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white text-purple-700 flex items-center justify-center font-extrabold border-2 border-white ring-2 ring-yellow-400">
+                    MB
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-serif font-black leading-tight">
+                    <span className="text-yellow-400 drop-shadow">Ma</span>
+                    <span className="text-white"> </span>
+                    <span className="text-white drop-shadow">Baba</span>
+                    <span className="text-white/80 text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap"> Cloth Store</span>
+                  </span>
+                  <span className="text-[10px] xs:text-xs sm:text-sm font-sans font-semibold tracking-wider text-white/80 mt-0.5">Elegant Clothing & Fashion</span>
+                </div>
               </div>
             </Link>
           </div>
