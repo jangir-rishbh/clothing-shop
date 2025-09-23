@@ -7,7 +7,7 @@ import { useI18n } from '@/context/I18nContext';
 import type { Locale } from '@/context/I18nContext';
 
 export default function SettingsPage() {
-  const { session, loading, refreshSession } = useAuth();
+  const { session, loading, refreshSession, signOut } = useAuth();
   const router = useRouter();
   const { t, locale, setLocale } = useI18n();
   const [saving, setSaving] = useState(false);
@@ -18,6 +18,9 @@ export default function SettingsPage() {
   const [mobile, setMobile] = useState('');
   const [gender, setGender] = useState<string | null>(null);
   const [userState, setUserState] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [activeGroup, setActiveGroup] = useState<'profile' | 'security'>('profile');
+
 
   useEffect(() => {
     if (!loading && !session) {
@@ -97,6 +100,30 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');
+    if (!confirmed) return;
+    setDeleting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const resp = await fetch('/api/delete-account', { method: 'POST' });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        throw new Error(data?.error || 'Failed to delete account');
+      }
+      // ensure local storage and context are cleared
+      try { await signOut(); } catch {}
+      // redirect to login (user can create a new account from there)
+      router.push('/login');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to delete account';
+      setError(message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -137,94 +164,148 @@ export default function SettingsPage() {
                     <option value="hi">{t('hindi')}</option>
                   </select>
                 </div>
-              </div>
-              {/* Profile Details Form */}
-              <div className="p-4 border border-gray-200 rounded-lg bg-white">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Profile Details</h4>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Mobile</label>
-                    <input
-                      type="tel"
-                      value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                      placeholder="e.g. 9876543210"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Gender</label>
-                    <select
-                      value={gender || ''}
-                      onChange={(e) => setGender(e.target.value || null)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                    >
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">State</label>
-                    <input
-                      type="text"
-                      value={userState || ''}
-                      onChange={(e) => setUserState(e.target.value || null)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                      placeholder="Your state"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end mt-4">
+
+              {/* Group Switcher */}
+              <div className="mt-6">
+                <div className="inline-flex rounded-md shadow-sm" role="group" aria-label="Settings groups">
                   <button
-                    onClick={handleSaveProfile}
-                    disabled={saving}
-                    className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    type="button"
+                    onClick={() => setActiveGroup('profile')}
+                    className={`px-4 py-2 text-sm font-medium border rounded-l-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      activeGroup === 'profile' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
                   >
-                    {saving ? 'Saving...' : 'Save Changes'}
+                    Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveGroup('security')}
+                    className={`px-4 py-2 text-sm font-medium border rounded-r-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      activeGroup === 'security' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    Security
                   </button>
                 </div>
               </div>
-              {/* Two-Factor Authentication Toggle */}
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
-                <div className="flex-1">
-                  <h4 className="text-lg font-medium text-gray-900">Two-Factor Authentication</h4>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Add an extra layer of security to your account with email verification.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Status: <span className={`font-medium ${twoFactorEnabled ? 'text-green-600' : 'text-red-600'}`}>
-                      {twoFactorEnabled ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </p>
-                </div>
-                <div className="ml-4">
-                  <button
-                    onClick={handleTwoFactorToggle}
-                    disabled={saving}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                      twoFactorEnabled ? 'bg-purple-600' : 'bg-gray-200'
-                    } ${saving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
+
+              {/* Notification Settings */}
+              <NotificationSection />
               </div>
+              {/* Grouped Content */}
+              {activeGroup === 'profile' ? (
+                <>
+                  {/* Profile */}
+                  <h3 className="text-xl font-semibold text-gray-900">Profile</h3>
+                  {/* Profile Details Form */}
+                  <div className="p-4 border border-gray-200 rounded-lg bg-white">
+                    <h4 className="text-lg font-medium text-gray-900 mb-4">Profile Details</h4>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Mobile</label>
+                        <input
+                          type="tel"
+                          value={mobile}
+                          onChange={(e) => setMobile(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                          placeholder="e.g. 9876543210"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                        <select
+                          value={gender || ''}
+                          onChange={(e) => setGender(e.target.value || null)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        >
+                          <option value="">Select</option>
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">State</label>
+                        <input
+                          type="text"
+                          value={userState || ''}
+                          onChange={(e) => setUserState(e.target.value || null)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                          placeholder="Your state"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end mt-4">
+                      <button
+                        onClick={handleSaveProfile}
+                        disabled={saving}
+                        className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {saving ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Account */}
+                  <h3 className="text-xl font-semibold text-gray-900">Security</h3>
+                  <div className="p-4 border border-gray-200 rounded-lg bg-white space-y-4">
+                    {/* Two-Factor Authentication Toggle */}
+                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-medium text-gray-900">Two-Factor Authentication</h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Add an extra layer of security to your account with email verification.
+                        </p>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Status: <span className={`font-medium ${twoFactorEnabled ? 'text-green-600' : 'text-red-600'}`}>
+                            {twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="ml-4">
+                        <button
+                          onClick={handleTwoFactorToggle}
+                          disabled={saving}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                            twoFactorEnabled ? 'bg-purple-600' : 'bg-gray-200'
+                          } ${saving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Delete Account */}
+                    <div className="p-4 border border-red-200 rounded-lg bg-red-50">
+                      <h4 className="text-lg font-semibold text-red-800 mb-2">Delete Account</h4>
+                      <p className="text-sm text-red-700 mb-4">Permanently delete your account and all associated data.</p>
+                      <button
+                        onClick={handleDeleteAccount}
+                        disabled={deleting}
+                        className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${deleting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {deleting ? 'Deleting...' : 'Delete Account'}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="flex justify-end space-x-3 pt-6">
                 <button
@@ -247,3 +328,78 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+// Lightweight client component for Notifications
+function NotificationSection() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [email_offers, setEmailOffers] = useState(true);
+  const [email_orders, setEmailOrders] = useState(true);
+  const [sms_updates, setSmsUpdates] = useState(false);
+  const [whatsapp_updates, setWhatsappUpdates] = useState(false);
+  const [push_enabled, setPushEnabled] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await fetch('/api/notifications', { cache: 'no-store' });
+        const data = await resp.json();
+        const n = data?.notifications;
+        if (n) {
+          setEmailOffers(!!n.email_offers);
+          setEmailOrders(!!n.email_orders);
+          setSmsUpdates(!!n.sms_updates);
+          setWhatsappUpdates(!!n.whatsapp_updates);
+          setPushEnabled(!!n.push_enabled);
+        }
+      } catch {}
+      setLoading(false);
+    })();
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const resp = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email_offers, email_orders, sms_updates, whatsapp_updates, push_enabled })
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data?.error || 'Failed to save notifications');
+      setSuccess('Notification settings saved');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to save notifications';
+      setError(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="p-4 border border-gray-200 rounded-lg bg-white">
+      <h4 className="text-lg font-medium text-gray-900 mb-4">Notification Settings</h4>
+      {error && <div className="mb-3 rounded bg-red-50 text-red-700 p-2 text-sm">{error}</div>}
+      {success && <div className="mb-3 rounded bg-green-50 text-green-700 p-2 text-sm">{success}</div>}
+      {loading ? (
+        <div className="text-gray-500">Loading notification settings...</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={email_offers} onChange={(e) => setEmailOffers(e.target.checked)} /> Email: Offers & Sales</label>
+          <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={email_orders} onChange={(e) => setEmailOrders(e.target.checked)} /> Email: Order Updates</label>
+          <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={sms_updates} onChange={(e) => setSmsUpdates(e.target.checked)} /> SMS Updates</label>
+          <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={whatsapp_updates} onChange={(e) => setWhatsappUpdates(e.target.checked)} /> WhatsApp Updates</label>
+          <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={push_enabled} onChange={(e) => setPushEnabled(e.target.checked)} /> Push Notifications</label>
+          <div className="sm:col-span-2 flex justify-end">
+            <button onClick={save} disabled={saving} className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}>{saving ? 'Saving...' : 'Save Notification Settings'}</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

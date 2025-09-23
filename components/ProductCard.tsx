@@ -28,14 +28,38 @@ export default function ProductCard({ id, name, price, category }: ProductCardPr
         const found = (data.overrides || []).find((o: { product_id: string; image?: string }) => o.product_id === id);
         if (mounted) setOverrideUrl(found?.image || null);
       } catch {}
+      // check wishlist status
+      try {
+        const w = await fetch('/api/wishlist', { cache: 'no-store' });
+        if (w.ok) {
+          const jd = await w.json();
+          const exists = (jd.wishlist || []).some((it: { product_id: string }) => it.product_id === id);
+          if (mounted) setIsWishlisted(!!exists);
+        }
+      } catch {}
     })();
     return () => { mounted = false; };
   }, [id]);
 
-  const toggleWishlist = (e: React.MouseEvent) => {
+  const toggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    try {
+      const resp = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: id }),
+      });
+      if (!resp.ok) {
+        return; // optionally show toast
+      }
+      const data = await resp.json();
+      if (data.added) setIsWishlisted(true);
+      else if (data.removed) setIsWishlisted(false);
+      else setIsWishlisted(!isWishlisted);
+    } catch {
+      // ignore errors for now
+    }
   };
 
   const formatPrice = (price: number) => {
