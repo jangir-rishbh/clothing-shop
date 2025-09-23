@@ -52,7 +52,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <button
               onClick={() => router.back()}
-              className={`mr-2 md:mr-3 p-2 rounded-full text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white ${pathname === '/home' ? 'invisible' : ''}`}
+              className={`mr-2 md:mr-3 p-2 rounded-full text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white ${pathname === '/home' ? 'hidden' : ''}`}
               aria-label={t('back')}
               title={t('back')}
             >
@@ -60,21 +60,20 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </button>
-            <Link href="/home" className="group relative flex-shrink-0">
+            <Link href="/home" className="group relative">
               <div className="flex items-center">
-                <div className="mr-3 relative">
+                <div className="mr-2 sm:mr-3 relative -ml-1 sm:-ml-2">
                   <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white text-purple-700 flex items-center justify-center font-extrabold border-2 border-white ring-2 ring-yellow-400">
                     MB
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-serif font-black leading-tight">
+                  <span className="text-xl sm:text-3xl md:text-4xl font-serif font-black leading-tight whitespace-nowrap">
                     <span className="text-yellow-400 drop-shadow">Ma</span>
                     <span className="text-white"> </span>
                     <span className="text-white drop-shadow">Baba</span>
-                    <span className="text-white/80 text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap"> Cloth Store</span>
+                    <span className="inline text-white/80 text-base sm:text-2xl md:text-3xl font-semibold"> Cloth Store</span>
                   </span>
-                  <span className="text-[10px] xs:text-xs sm:text-sm font-sans font-semibold tracking-wider text-white/80 mt-0.5">{t('brandTagline')}</span>
                 </div>
               </div>
             </Link>
