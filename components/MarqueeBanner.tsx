@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
+import { useI18n } from '@/context/I18nContext';
 
 const MarqueeBanner = () => {
+  const { t } = useI18n();
   return (
     <div className="bg-yellow-400 text-black py-2 px-4 overflow-hidden">
       <div className="marquee">
         <span className="font-medium">
-          🌟 Special Offer: Professional Tailoring Services Available! Get your clothes stitched with perfect fit and style. Visit us today! 🌟
+          {t('marqueeOffer')}
         </span>
       </div>
       <style jsx>{`

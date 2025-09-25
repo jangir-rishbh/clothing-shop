@@ -21,6 +21,8 @@ const resources: Resources = {
 
     // Brand tagline
     brandTagline: "Elegant Clothing & Fashion",
+    // Marquee banner
+    marqueeOffer: "🌟 Special Offer: Professional Tailoring Services Available! Get your clothes stitched with perfect fit and style. Visit us today! 🌟",
 
     // Nav items
     home: "Home",
@@ -58,6 +60,8 @@ const resources: Resources = {
 
     // Brand tagline
     brandTagline: "खूबसूरत कपड़े और फ़ैशन",
+    // Marquee banner
+    marqueeOffer: "🌟 विशेष ऑफ़र: प्रोफेशनल टेलरिंग सेवाएँ उपलब्ध! परफेक्ट फिट और स्टाइल के साथ अपने कपड़े सिलवाएँ। आज ही पधारें! 🌟",
 
     // Nav items
     home: "होम",

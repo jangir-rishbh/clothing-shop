@@ -36,6 +36,7 @@ export default function Navbar() {
     { key: 'home', href: '/home' },
     { key: 'about', href: '/about' },
     { key: 'contact', href: '/contact' },
+    { key: 'settings', href: '/settings' },
   ];
   const navItems = (!loading && session)
     ? [
@@ -120,20 +121,8 @@ export default function Navbar() {
                         </Link>
                       )}
                       
-                      <Link 
-                        href="/wishlist" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        Wishlist
-                      </Link>
-                      <Link 
-                        href="/settings" 
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        {t('settings')}
-                      </Link>
+                      
+                      
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -200,6 +189,13 @@ export default function Navbar() {
               >
                 {t('mobileContact')}
               </Link>
+              <Link
+                href="/settings"
+                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('settings')}
+              </Link>
               {(!loading && session) && (
                 <Link
                   href="/messages"
@@ -209,17 +205,7 @@ export default function Navbar() {
                   {t('mobileMessages')}
                 </Link>
               )}
-              {(!loading && session) && (
-                <>
-                  <Link
-                    href="/wishlist"
-                    className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Wishlist
-                  </Link>
-                </>
-              )}
+              
               {isAdmin && (
                 <Link
                   href="/admin/profile"
@@ -253,13 +239,7 @@ export default function Navbar() {
                           {t('yourProfile')}
                         </Link>
                       )}
-                      <Link
-                        href="/settings"
-                        className="block px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {t('settings')}
-                      </Link>
+                      
                       <button
                         onClick={() => {
                           handleLogout();

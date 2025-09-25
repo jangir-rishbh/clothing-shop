@@ -130,7 +130,7 @@ export default function ForgotPassword() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-gray-900 dark:to-gray-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-4 -left-4 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
         <div className="absolute top-1/4 -right-4 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
@@ -148,10 +148,10 @@ export default function ForgotPassword() {
               <span className="text-xs font-sans not-italic text-gray-500 mt-1">Elegant Clothing & Fashion</span>
             </div>
           </Link>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-gray-100">
             {step === 1 ? 'Reset Your Password' : step === 2 ? 'Verify Your Identity' : 'All Set!'}
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
             {step === 1 
               ? 'Enter your email to receive a verification code' 
               : step === 2 
@@ -162,7 +162,7 @@ export default function ForgotPassword() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-xl sm:px-10 relative overflow-hidden">
+        <div className="bg-white dark:bg-gray-900/80 py-8 px-4 shadow-xl rounded-xl sm:px-10 relative overflow-hidden border border-white/20 dark:border-gray-700 dark:text-gray-100">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-indigo-500"></div>
           
           {step === 3 ? (
@@ -170,8 +170,8 @@ export default function ForgotPassword() {
               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                 <FiCheckCircle className="h-10 w-10 text-green-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Password Reset Successful!</h3>
-              <p className="text-gray-600 mb-6">You can now log in with your new password.</p>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Password Reset Successful!</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">You can now log in with your new password.</p>
               <Link 
                 href="/login" 
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
@@ -187,8 +187,8 @@ export default function ForgotPassword() {
                 <div 
                   className={`mb-6 p-4 rounded-md ${
                     message.isError 
-                      ? 'bg-red-50 text-red-700 border border-red-200' 
-                      : 'bg-green-50 text-green-700 border border-green-200'
+                      ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/40' 
+                      : 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800/40'
                   }`}
                 >
                   <p className="text-sm">{message.text}</p>
@@ -198,7 +198,7 @@ export default function ForgotPassword() {
               {step === 1 ? (
                 <form className="space-y-6" onSubmit={handleRequestOtp}>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Email address
                     </label>
                     <div className="mt-1 relative rounded-md shadow-sm">
@@ -213,7 +213,7 @@ export default function ForgotPassword() {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 border text-gray-900"
+                        className="focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-700 rounded-md py-3 border text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 placeholder-gray-400 dark:placeholder-gray-400"
                         placeholder="you@example.com"
                       />
                     </div>
@@ -235,7 +235,7 @@ export default function ForgotPassword() {
                 <form className="space-y-6" onSubmit={handleResetPassword}>
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="otp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Verification Code
                       </label>
                       <div className="mt-1">
@@ -249,7 +249,7 @@ export default function ForgotPassword() {
                           required
                           value={otp}
                           onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                          className="focus:ring-purple-500 focus:border-purple-500 block w-full px-4 py-3 sm:text-sm border border-gray-300 rounded-md text-gray-900"
+                          className="focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-purple-500 block w-full px-4 py-3 sm:text-sm border border-gray-300 dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 placeholder-gray-400 dark:placeholder-gray-400"
                           placeholder="000000"
                         />
                       </div>
@@ -257,7 +257,7 @@ export default function ForgotPassword() {
                     </div>
 
                     <div>
-                      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         New Password
                       </label>
                       <div className="mt-1 relative rounded-md shadow-sm">
@@ -272,13 +272,13 @@ export default function ForgotPassword() {
                           minLength={8}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md py-3 border text-gray-900"
+                          className="focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-purple-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 dark:border-gray-700 rounded-md py-3 border text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 placeholder-gray-400 dark:placeholder-gray-400"
                           placeholder="••••••••"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                         >
                           {showPassword ? 'Hide' : 'Show'}
                         </button>
@@ -286,7 +286,7 @@ export default function ForgotPassword() {
                     </div>
 
                     <div>
-                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Confirm New Password
                       </label>
                       <div className="mt-1 relative rounded-md shadow-sm">
@@ -301,7 +301,7 @@ export default function ForgotPassword() {
                           minLength={8}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md py-3 border text-gray-900"
+                          className="focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-purple-500 block w-full pl-10 pr-10 sm:text-sm border-gray-300 dark:border-gray-700 rounded-md py-3 border text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 placeholder-gray-400 dark:placeholder-gray-400"
                           placeholder="••••••••"
                         />
                       </div>
@@ -341,7 +341,7 @@ export default function ForgotPassword() {
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
+                <span className="px-2 bg-white dark:bg-gray-900/80 text-gray-500 dark:text-gray-400">
                   Remembered your password?
                 </span>
               </div>
@@ -350,7 +350,7 @@ export default function ForgotPassword() {
             <div className="mt-6">
               <Link 
                 href="/login" 
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
               >
                 Back to Login
               </Link>

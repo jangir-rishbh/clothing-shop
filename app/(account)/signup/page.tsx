@@ -225,7 +225,7 @@ export default function SignupPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600"
+      className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900"
     >
       {/* Floating bubbles background layer */}
       <div className="bubble-layer" aria-hidden="true">
@@ -247,7 +247,7 @@ export default function SignupPage() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative z-10 max-w-xl w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 transform transition-all duration-500 hover:shadow-3xl"
+        className="relative z-10 max-w-xl w-full space-y-8 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700 dark:text-gray-100 transform transition-all duration-500 hover:shadow-3xl"
       >
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -262,7 +262,7 @@ export default function SignupPage() {
             Create a new account
           </motion.h2>
           <motion.p 
-            className="mt-2 text-center text-sm text-gray-600"
+            className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -284,7 +284,7 @@ export default function SignupPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="rounded-md bg-red-50 p-4"
+              className="rounded-md bg-red-50 dark:bg-red-900/30 p-4"
             >
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -301,7 +301,7 @@ export default function SignupPage() {
                   </motion.svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-red-800">{error}</p>
+                  <p className="text-sm font-medium text-red-800 dark:text-red-300">{error}</p>
                 </div>
               </div>
             </motion.div>
@@ -315,7 +315,7 @@ export default function SignupPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="rounded-md bg-green-50 p-4"
+              className="rounded-md bg-green-50 dark:bg-green-900/30 p-4"
             >
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -332,7 +332,7 @@ export default function SignupPage() {
                   </motion.svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-green-800">{success}</p>
+                  <p className="text-sm font-medium text-green-800 dark:text-green-300">{success}</p>
                 </div>
               </div>
             </motion.div>
@@ -357,13 +357,13 @@ export default function SignupPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
               <motion.input
                 id="name"
                 name="name"
                 type="text"
                 required
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 bg-white dark:bg-gray-800/60 focus:z-10 sm:text-sm"
                 placeholder="Full Name"
                 value={formData.name}
                 onChange={handleChange}
@@ -375,7 +375,7 @@ export default function SignupPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email address
               </label>
               <motion.input
@@ -391,7 +391,7 @@ export default function SignupPage() {
                 whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
               />
               <motion.p 
-                className="mt-1 text-xs text-gray-500"
+                className="mt-1 text-xs text-gray-500 dark:text-gray-400"
                 initial={{ opacity: 0.7 }}
                 whileHover={{ opacity: 1 }}
                 transition={{ duration: 0.2 }}
@@ -404,7 +404,7 @@ export default function SignupPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mobile Number
               </label>
               <motion.input
@@ -434,11 +434,11 @@ export default function SignupPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Gender
               </label>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500">
                   <span className="text-lg leading-none select-none" aria-hidden={formData.gender === ''} aria-label={formData.gender || 'gender'}>
                     {formData.gender === 'male' && '👱‍♂️'}
                     {formData.gender === 'female' && '👱‍♀️'}
@@ -451,7 +451,7 @@ export default function SignupPage() {
                   name="gender"
                   value={formData.gender}
                   onChange={(e) => setFormData({...formData, gender: e.target.value as Gender})}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 sm:text-sm bg-white dark:bg-gray-800/60"
                   required
                   whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
                 >
@@ -467,7 +467,7 @@ export default function SignupPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="state" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 State/Union Territory
               </label>
               <motion.select
@@ -475,7 +475,7 @@ export default function SignupPage() {
                 name="state"
                 value={formData.state}
                 onChange={(e) => setFormData({...formData, state: e.target.value})}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800/60"
                 required
                 whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
               >
@@ -509,7 +509,7 @@ export default function SignupPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Create Password
               </label>
               <div className="relative">
@@ -519,7 +519,7 @@ export default function SignupPage() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   minLength={6}
-                  className="appearance-none relative block w-full pr-12 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full pr-12 px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800/60"
                   placeholder="Enter a secure password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -529,7 +529,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 hover:text-gray-800"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? 'Hide' : 'Show'}
@@ -549,7 +549,7 @@ export default function SignupPage() {
               whileHover={{ scale: 1.01 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm Password
               </label>
               <div className="relative">
@@ -569,7 +569,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 hover:text-gray-800"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                   aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
                   {showConfirmPassword ? 'Hide' : 'Show'}

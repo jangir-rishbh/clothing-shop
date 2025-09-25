@@ -249,13 +249,13 @@ export default function VerifyOtpPage() {
 
   // Render the component
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500">
-      <div className="max-w-md w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+      <div className="max-w-md w-full space-y-8 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700 dark:text-gray-100">
         <div>
-          <h2 className="text-3xl font-bold text-center text-gray-900">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100">
             {verificationMethod === 'email' ? 'Verify Your Email' : 'Verify Your Phone'}
           </h2>
-          <p className="mt-2 text-sm text-center text-gray-600">
+          <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-300">
             {verificationMethod === 'email' 
               ? `We've sent a 6-digit verification code to ${email}`
               : `We've sent a 6-digit verification code to +91${phone}`
@@ -264,7 +264,7 @@ export default function VerifyOtpPage() {
         </div>
 
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
+          <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -272,14 +272,14 @@ export default function VerifyOtpPage() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-red-800">{error}</p>
+                <p className="text-sm font-medium text-red-800 dark:text-red-300">{error}</p>
               </div>
             </div>
           </div>
         )}
 
         {success && (
-          <div className="rounded-md bg-green-50 p-4">
+          <div className="rounded-md bg-green-50 dark:bg-green-900/30 p-4">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
@@ -287,7 +287,7 @@ export default function VerifyOtpPage() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">{success}</p>
+                <p className="text-sm font-medium text-green-800 dark:text-green-300">{success}</p>
               </div>
             </div>
           </div>
@@ -296,7 +296,7 @@ export default function VerifyOtpPage() {
         {!verificationComplete && (
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
             <div className="relative">
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="otp" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Enter 6-digit OTP
               </label>
               <input
@@ -311,8 +311,8 @@ export default function VerifyOtpPage() {
                 autoComplete="one-time-code"
                 autoFocus
                 className={`w-full px-4 py-3 border ${
-                  error ? 'border-red-500' : 'border-gray-300'
-                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-xl tracking-widest font-mono text-gray-900 bg-white`}
+                  error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-center text-xl tracking-widest font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 dark:placeholder-gray-400`}
                 placeholder="_ _ _ _ _ _"
                 disabled={loading || showPasswordForm}
               />
@@ -320,7 +320,7 @@ export default function VerifyOtpPage() {
                 <button
                   type="button"
                   onClick={() => setOtp('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                   aria-label="Clear OTP"
                 >
                   ✕
@@ -341,16 +341,16 @@ export default function VerifyOtpPage() {
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
 
-              <div className="text-center text-sm">
-                <span className="text-gray-600">Didn&apos;t receive code? </span>
+              <div className="text-center text-sm dark:text-gray-300">
+                <span className="text-gray-600 dark:text-gray-400">Didn&apos;t receive code? </span>
                 <button
                   type="button"
                   onClick={handleResendOtp}
                   disabled={resendDisabled || loading || showPasswordForm}
-                  className={`font-medium ${
+                  className={`font-medium dark:bg-gray-800/60 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:underline ${
                     resendDisabled || showPasswordForm
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-blue-600 hover:text-blue-700 hover:underline'
+                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                      : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'
                   }`}
                 >
                   {resendDisabled ? `Resend in ${resendCountdown}s` : 'Resend OTP'}
@@ -363,7 +363,7 @@ export default function VerifyOtpPage() {
         {showPasswordForm && !verificationComplete && (
           <div className="mt-8 space-y-6">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -372,7 +372,7 @@ export default function VerifyOtpPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pr-12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full pr-12 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 dark:placeholder-gray-400"
                   placeholder="Enter password"
                   required
                   minLength={6}
@@ -382,7 +382,7 @@ export default function VerifyOtpPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 hover:text-gray-800"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? 'Hide' : 'Show'}
@@ -391,7 +391,7 @@ export default function VerifyOtpPage() {
             </div>
             
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm Password
               </label>
               <div className="relative">
@@ -400,7 +400,7 @@ export default function VerifyOtpPage() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pr-12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
+                  className="w-full pr-12 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 dark:placeholder-gray-400"
                   placeholder="Confirm password"
                   required
                   minLength={6}
@@ -410,7 +410,7 @@ export default function VerifyOtpPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 hover:text-gray-800"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                   aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
                   {showConfirmPassword ? 'Hide' : 'Show'}
@@ -434,11 +434,11 @@ export default function VerifyOtpPage() {
         )}
 
         <div className="text-center text-sm mt-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Wrong email?{' '}
             <Link 
               href="/signup" 
-              className="font-medium text-purple-600 hover:text-purple-700 hover:underline"
+              className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:underline"
             >
               Go back
             </Link>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FiHeart, FiShoppingCart, FiEye, FiShare2 } from "react-icons/fi";
+import { FiShoppingCart, FiEye, FiShare2 } from "react-icons/fi";
 
 interface ProductCardProps {
   id: string;
@@ -14,7 +14,6 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ id, name, price, category }: ProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
   const [overrideUrl, setOverrideUrl] = useState<string | null>(null);
   const placeholder = 'https://placehold.co/800x600/png?text=No+Image';
@@ -28,39 +27,9 @@ export default function ProductCard({ id, name, price, category }: ProductCardPr
         const found = (data.overrides || []).find((o: { product_id: string; image?: string }) => o.product_id === id);
         if (mounted) setOverrideUrl(found?.image || null);
       } catch {}
-      // check wishlist status
-      try {
-        const w = await fetch('/api/wishlist', { cache: 'no-store' });
-        if (w.ok) {
-          const jd = await w.json();
-          const exists = (jd.wishlist || []).some((it: { product_id: string }) => it.product_id === id);
-          if (mounted) setIsWishlisted(!!exists);
-        }
-      } catch {}
     })();
     return () => { mounted = false; };
   }, [id]);
-
-  const toggleWishlist = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      const resp = await fetch('/api/wishlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: id }),
-      });
-      if (!resp.ok) {
-        return; // optionally show toast
-      }
-      const data = await resp.json();
-      if (data.added) setIsWishlisted(true);
-      else if (data.removed) setIsWishlisted(false);
-      else setIsWishlisted(!isWishlisted);
-    } catch {
-      // ignore errors for now
-    }
-  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -90,14 +59,6 @@ export default function ProductCard({ id, name, price, category }: ProductCardPr
             New
           </div>
           
-          {/* Wishlist Button */}
-          <button 
-            onClick={toggleWishlist}
-            className={`absolute top-3 left-3 p-2 rounded-full ${isWishlisted ? 'bg-pink-100 text-pink-600' : 'bg-white text-gray-600'} shadow-md hover:bg-pink-100 hover:text-pink-600 transition-colors`}
-            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            <FiHeart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-          </button>
           
           {/* Quick Actions */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">

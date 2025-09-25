@@ -221,11 +221,11 @@ export default function HomePage() {
       )}
 
       {/* Featured Products Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="inline-block text-yellow-600 text-sm font-semibold tracking-widest uppercase mb-3">Our Selection</span>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Featured Products</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">Featured Products</h2>
             <div className="w-20 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 mx-auto rounded-full"></div>
           </div>
           
@@ -233,7 +233,7 @@ export default function HomePage() {
             {[...custom.map((p) => ({ id: p.id, name: p.name, price: Number(p.price), image: p.image || '', category: p.category || 'Custom' })), ...featuredProducts].map((product) => (
               <div key={product.id} className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-pink-500 rounded-2xl opacity-0 group-hover:opacity-75 blur transition-all duration-300 group-hover:duration-200"></div>
-                <div className="relative h-full bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="relative h-full bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-transparent dark:border-gray-700">
                   <ProductCard 
                     id={product.id}
                     name={product.name}
