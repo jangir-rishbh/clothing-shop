@@ -19,6 +19,69 @@
   }
 }
 
+/* Explicit theme overrides via class on html element */
+/* Force light theme regardless of system preference */
+.light {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Force dark theme regardless of system preference */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+/* Make forms, cards, and text adapt when dark class is on html */
+html.dark { color-scheme: dark; }
+html.dark .bg-gray-50 { background-color: #0b1220 !important; }
+html.dark .bg-white { background-color: #111827 !important; }
+html.dark .text-gray-900 { color: #e5e7eb !important; }
+html.dark .text-gray-950 { color: #f3f4f6 !important; }
+html.dark .text-gray-800 { color: #e5e7eb !important; }
+html.dark .text-gray-700 { color: #d1d5db !important; }
+html.dark .text-gray-600 { color: #cbd5e1 !important; }
+html.dark .text-gray-500 { color: #94a3b8 !important; }
+html.dark .text-gray-400 { color: #9ca3af !important; }
+html.dark .text-black { color: #f5f6f7 !important; }
+html.dark .text-white { color: #ffffff !important; }
+html.dark .border-gray-200 { border-color: #374151 !important; }
+html.dark .border-gray-300 { border-color: #4b5563 !important; }
+html.dark .bg-red-50 { background-color: #2a0b0b !important; }
+html.dark .text-red-900 { color: #fecaca !important; }
+html.dark .text-red-800 { color: #fecaca !important; }
+html.dark .text-red-700 { color: #fca5a5 !important; }
+
+/* Ensure text inside common card containers inherits readable color in dark */
+html.dark .bg-white,
+html.dark .bg-gray-50 {
+  color: var(--foreground) !important;
+}
+html.dark .bg-white h1,
+html.dark .bg-white h2,
+html.dark .bg-white h3,
+html.dark .bg-white h4,
+html.dark .bg-white h5,
+html.dark .bg-white h6,
+html.dark .bg-white p,
+html.dark .bg-white span,
+html.dark .bg-white li,
+html.dark .bg-white small,
+html.dark .bg-white label,
+html.dark .bg-gray-50 h1,
+html.dark .bg-gray-50 h2,
+html.dark .bg-gray-50 h3,
+html.dark .bg-gray-50 h4,
+html.dark .bg-gray-50 h5,
+html.dark .bg-gray-50 h6,
+html.dark .bg-gray-50 p,
+html.dark .bg-gray-50 span,
+html.dark .bg-gray-50 li,
+html.dark .bg-gray-50 small,
+html.dark .bg-gray-50 label {
+  color: var(--foreground) !important;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -91,10 +154,14 @@ input:focus, textarea:focus {
   transition: all 0.3s ease;
 }
 
-/* Ensure input text is visible */
+/* Form controls inherit theme variables */
 input, textarea, select {
-  color: #111827 !important;
-  background-color: #ffffff !important;
+  color: var(--foreground);
+  background-color: var(--background);
+  border: 1px solid #e5e7eb;
+}
+html.dark input, html.dark textarea, html.dark select {
+  border-color: #374151;
 }
 
 /* Floating bubbles background */

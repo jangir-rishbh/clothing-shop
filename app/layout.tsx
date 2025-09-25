@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "@components/Navbar";
 import Footer from "@components/Footer";
@@ -32,7 +33,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
+            try {
+              var t = localStorage.getItem('theme');
+              var el = document.documentElement;
+              el.classList.remove('light','dark');
+              el.classList.add(t === 'dark' ? 'dark' : 'light');
+            } catch {}
+          `}
+        </Script>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <I18nProvider>
           <AuthProvider>

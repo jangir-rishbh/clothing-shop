@@ -20,6 +20,7 @@ export default function SettingsPage() {
   const [userState, setUserState] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [activeGroup, setActiveGroup] = useState<'profile' | 'security'>('profile');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
 
   useEffect(() => {
@@ -34,6 +35,55 @@ export default function SettingsPage() {
       setUserState(session.state || null);
     }
   }, [session, loading, router]);
+
+  // Apply theme helper
+  const applyTheme = (next: 'light' | 'dark') => {
+    if (typeof document !== 'undefined') {
+      const el = document.documentElement;
+      el.classList.remove('light', 'dark');
+      el.classList.add(next);
+    }
+    try { localStorage.setItem('theme', next); } catch {}
+  };
+
+  // Load theme from preferences or localStorage
+  useEffect(() => {
+    // Prefer localStorage immediately for snappy UI
+    try {
+      const stored = localStorage.getItem('theme') as 'light' | 'dark' | null;
+      if (stored === 'light' || stored === 'dark') {
+        setTheme(stored);
+        applyTheme(stored);
+      }
+    } catch {}
+
+    // If authenticated, fetch server preferences
+    (async () => {
+      if (loading || !session) return;
+      try {
+        const resp = await fetch('/api/preferences', { cache: 'no-store' });
+        const data = await resp.json();
+        const prefTheme = data?.preferences?.theme as 'light' | 'dark' | null;
+        if (prefTheme === 'light' || prefTheme === 'dark') {
+          setTheme(prefTheme);
+          applyTheme(prefTheme);
+        }
+      } catch {}
+    })();
+  }, [loading, session]);
+
+  const handleThemeChange = async (next: 'light' | 'dark') => {
+    setTheme(next);
+    applyTheme(next);
+    // Persist to server preferences (best-effort)
+    try {
+      await fetch('/api/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme: next })
+      });
+    } catch {}
+  };
 
   if (loading || !session) {
     return (
@@ -163,6 +213,23 @@ export default function SettingsPage() {
                     <option value="en">{t('english')}</option>
                     <option value="hi">{t('hindi')}</option>
                   </select>
+                </div>
+
+                {/* Theme Preference */}
+                <div className="mt-6">
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">Theme</h4>
+                  <p className="text-sm text-gray-600 mb-4">Switch between Light and Dark mode.</p>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={theme}
+                      onChange={(e) => handleThemeChange((e.target.value as 'light' | 'dark'))}
+                      className="mt-1 block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                      aria-label="Theme"
+                    >
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                    </select>
+                  </div>
                 </div>
 
               {/* Group Switcher */}

@@ -19,44 +19,44 @@ export default function ContactPage() {
         {/* Contact Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {/* Phone Card */}
-          <div className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-l-4 border-purple-600">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-l-4 border-purple-600 dark:border-gray-700">
             <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-center text-gray-800 mb-4">Call Us</h3>
-            <p className="text-gray-600 text-center mb-4">Speak with our team</p>
-            <a href="tel:+918696790758" className="block text-center text-purple-600 hover:text-purple-800 text-lg font-medium transition-colors">
+            <h3 className="text-xl font-bold text-center text-gray-800 dark:text-gray-100 mb-4">Call Us</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-center mb-4">Speak with our team</p>
+            <a href="tel:+918696790758" className="block text-center text-purple-600 hover:text-purple-800 dark:text-purple-300 dark:hover:text-purple-200 text-lg font-medium transition-colors">
               +91 86967 90758
             </a>
           </div>
           
           {/* Email Card */}
-          <div className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-l-4 border-blue-500">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-l-4 border-blue-500 dark:border-gray-700">
             <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-center text-gray-800 mb-4">Email Us</h3>
-            <p className="text-gray-600 text-center mb-4">Send us a message</p>
-            <a href="mailto:manishjangir348@gmail.com" className="block text-center text-blue-600 hover:text-blue-800 text-lg font-medium transition-colors">
+            <h3 className="text-xl font-bold text-center text-gray-800 dark:text-gray-100 mb-4">Email Us</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-center mb-4">Send us a message</p>
+            <a href="mailto:manishjangir348@gmail.com" className="block text-center text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 text-lg font-medium transition-colors">
               manishjangir348@gmail.com
             </a>
           </div>
           
           {/* Location Card */}
-          <div className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-l-4 border-indigo-500">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-l-4 border-indigo-500 dark:border-gray-700">
             <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-center text-gray-800 mb-4">Visit Us</h3>
-            <p className="text-gray-600 text-center mb-4">Come say hello</p>
-            <div className="text-center text-gray-700">
+            <h3 className="text-xl font-bold text-center text-gray-800 dark:text-gray-100 mb-4">Visit Us</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-center mb-4">Come say hello</p>
+            <div className="text-center text-gray-700 dark:text-gray-300">
               <p>Post office gadli, Gadli</p>
               <p>District - Jhunjhunu</p>
               <p>State - Rajasthan, PIN - 333033</p>
@@ -65,11 +65,11 @@ export default function ContactPage() {
         </div>
         
         {/* Contact Information Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-12">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-12">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Contact Information</h2>
+            <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">Contact Information</h2>
             <div className="w-20 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 mx-auto my-4"></div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Get in touch with us through any of the following ways. We&apos;re here to help and answer any questions you might have.
             </p>
           </div>
@@ -81,9 +81,9 @@ export default function ContactPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Call Us</h3>
-              <p className="text-gray-600 mb-4">Speak with our team</p>
-              <a href="tel:+918696790758" className="text-purple-600 hover:text-purple-800 text-lg font-medium transition-colors">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Call Us</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">Speak with our team</p>
+              <a href="tel:+918696790758" className="text-purple-600 hover:text-purple-800 dark:text-purple-300 dark:hover:text-purple-200 text-lg font-medium transition-colors">
                 +91 86967 90758
               </a>
             </div>
@@ -94,9 +94,9 @@ export default function ContactPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Email Us</h3>
-              <p className="text-gray-600 mb-4">Send us an email</p>
-              <a href="mailto:manishjangir348@gmail.com" className="text-blue-600 hover:text-blue-800 text-lg font-medium transition-colors">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Email Us</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">Send us an email</p>
+              <a href="mailto:manishjangir348@gmail.com" className="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 text-lg font-medium transition-colors">
                 manishjangir348@gmail.com
               </a>
             </div>
@@ -108,9 +108,9 @@ export default function ContactPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Visit Us</h3>
-              <p className="text-gray-600 mb-4">Come say hello</p>
-              <div className="text-gray-700">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Visit Us</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">Come say hello</p>
+              <div className="text-gray-700 dark:text-gray-300">
                 <p>Post office gadli, Gadli</p>
                 <p>District - Jhunjhunu</p>
                 <p>State - Rajasthan, PIN - 333033</p>
@@ -119,7 +119,7 @@ export default function ContactPage() {
           </div>
           
           <div className="mt-12 text-center">
-            <h4 className="text-xl font-semibold text-gray-800 mb-6">Follow Us</h4>
+            <h4 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-6">Follow Us</h4>
             <div className="flex justify-center space-x-4">
               <a href="#" className="bg-purple-100 p-3 rounded-full hover:bg-purple-200 transition-colors">
                 <span className="sr-only">Facebook</span>
@@ -144,14 +144,14 @@ export default function ContactPage() {
         </div>
         
         {/* Business Hours Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mt-12">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 mt-12">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Our Business Hours</h2>
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Our Business Hours</h2>
             <div className="w-20 h-0.5 bg-yellow-500 mx-auto my-4"></div>
           </div>
           
           <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="flex items-center mb-6">
                 <div className="p-3 bg-indigo-100 rounded-lg mr-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -162,23 +162,23 @@ export default function ContactPage() {
               </div>
             
               <div className="space-y-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-700">Monday - Saturday</span>
-                    <span className="font-semibold text-indigo-600">9:00 AM - 9:00 PM</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-200">Monday - Saturday</span>
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-300">9:00 AM - 9:00 PM</span>
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-700">Sunday</span>
-                    <span className="font-semibold text-indigo-600">10:00 AM - 8:00 PM</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-200">Sunday</span>
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-300">10:00 AM - 8:00 PM</span>
                   </div>
                 </div>
                 
-                <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl text-center">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Need help urgently?</h3>
-                  <p className="text-gray-600 mb-4">Call us anytime for immediate assistance</p>
+                <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 p-6 rounded-xl text-center">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Need help urgently?</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">Call us anytime for immediate assistance</p>
                   <a href="tel:+919876543210" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -189,7 +189,7 @@ export default function ContactPage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="flex items-center mb-6">
                 <div className="p-3 bg-pink-100 rounded-lg mr-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,7 +199,7 @@ export default function ContactPage() {
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">Follow Us</h2>
               </div>
               
-              <p className="text-gray-600 mb-6">Visit our store to explore our exclusive collection and enjoy personalized assistance from our fashion experts.</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">Visit our store to explore our exclusive collection and enjoy personalized assistance from our fashion experts.</p>
               
               <div className="flex space-x-4">
                 <a href="#" className="p-3 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors">
