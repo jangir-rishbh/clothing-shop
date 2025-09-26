@@ -14,13 +14,14 @@ const resources: Resources = {
     back: "Back",
     menu: "Menu",
     settings: "Settings",
+    logout: "Logout",
     signOut: "Sign out",
     login: "Login",
     signup: "Sign Up",
     yourProfile: "Your Profile",
 
     // Brand tagline
-    brandTagline: "Elegant Clothing & Fashion",
+    brandTagline: "Elegant clothing & Fashion",
     // Marquee banner
     marqueeOffer: "🌟 Special Offer: Professional Tailoring Services Available! Get your clothes stitched with perfect fit and style. Visit us today! 🌟",
 
@@ -53,6 +54,7 @@ const resources: Resources = {
     back: "वापस",
     menu: "मेनू",
     settings: "सेटिंग्स",
+    logout: "लॉगआउट",
     signOut: "साइन आउट",
     login: "लॉगिन",
     signup: "साइन अप",

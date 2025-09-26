@@ -9,7 +9,7 @@ import { useI18n } from "@/context/I18nContext";
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { session, signOut, loading } = useAuth();
+  const { session, loading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = !loading && session?.role === 'admin';
@@ -20,16 +20,12 @@ export default function Navbar() {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      window.location.href = '/home';
-    } catch (error) {
-      console.error('Error signing out:', error);
-    } finally {
-      setIsUserMenuOpen(false);
-    }
-  };
+  // Fixed brand text as per request
+  const brandText = 'MB';
+
+  // No extra display name next to brand; only initials in the circle
+
+  // Logout has been moved to Settings page
 
   // Navigation items
   const baseNavItems = [
@@ -64,8 +60,8 @@ export default function Navbar() {
             <Link href="/home" className="group relative">
               <div className="flex items-center">
                 <div className="mr-2 sm:mr-3 relative -ml-1 sm:-ml-2">
-                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white text-purple-700 flex items-center justify-center font-extrabold border-2 border-white ring-2 ring-yellow-400">
-                    MB
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white text-purple-700 flex items-center justify-center font-extrabold border-2 border-white ring-2 ring-yellow-400" title={(!loading && session) ? (session.name || session.email || 'MB') : 'MB'}>
+                    <span className="text-base sm:text-lg leading-none">{brandText}</span>
                   </div>
                 </div>
                 <div className="flex flex-col">
@@ -121,14 +117,6 @@ export default function Navbar() {
                         </Link>
                       )}
                       
-                      
-                      
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        {t('signOut')}
-                      </button>
                     </div>
                   )}
                 </div>
@@ -240,15 +228,6 @@ export default function Navbar() {
                         </Link>
                       )}
                       
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setIsMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
-                      >
-                        {t('signOut')}
-                      </button>
                     </div>
                   </div>
                 ) : (

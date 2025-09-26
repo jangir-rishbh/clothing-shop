@@ -43,6 +43,15 @@ export default function SettingsPage() {
     try { localStorage.setItem('theme', next); } catch {}
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/home');
+    } catch (e) {
+      console.error('Error signing out:', e);
+    }
+  };
+
   // Load theme from preferences or localStorage
   useEffect(() => {
     // Prefer localStorage immediately for snappy UI
@@ -357,6 +366,20 @@ export default function SettingsPage() {
                                   twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
                                 }`}
                               />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Logout */}
+                        <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">{t('logout')}</h4>
+                          <p className="text-sm text-gray-600 mb-4">Sign out of your account on this device.</p>
+                          <div className="flex justify-center">
+                            <button
+                              onClick={handleLogout}
+                              className="px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700"
+                            >
+                              {t('logout')}
                             </button>
                           </div>
                         </div>
