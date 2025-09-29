@@ -29,6 +29,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showOtpField, setShowOtpField] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [captchaSvg, setCaptchaSvg] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaText, setCaptchaText] = useState<string>('');
 
   // Check if user is already logged in
   useEffect(() => {
@@ -46,6 +49,23 @@ export default function LoginPage() {
       setError('Your account has been banned. Please contact support for assistance.');
     }
   }, [searchParams]);
+
+  // Load CAPTCHA on mount and when needed
+  const loadCaptcha = async () => {
+    try {
+      const res = await fetch('/api/captcha', { cache: 'no-store' });
+      const data = await res.json();
+      setCaptchaSvg(data.svg);
+      setCaptchaToken(data.token);
+      setCaptchaText('');
+    } catch (e) {
+      console.error('Failed to load captcha', e);
+    }
+  };
+
+  useEffect(() => {
+    loadCaptcha();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -65,7 +85,17 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        const { error, data } = await signIn(formData.email, formData.password, showOtpField ? formData.otp : undefined);
+        // Require captcha for login
+        if (!captchaText || !captchaToken) {
+          throw new Error('Please solve the CAPTCHA');
+        }
+        const { error, data } = await signIn(
+          formData.email,
+          formData.password,
+          showOtpField ? formData.otp : undefined,
+          captchaText,
+          captchaToken
+        );
         if (error) {
           throw new Error(typeof error === 'string' ? error : 'Invalid email or password');
         }
@@ -130,6 +160,10 @@ export default function LoginPage() {
         setIsLogin(true);
       } else if (errorMessage.includes('banned')) {
         setError('Your account has been banned. Please contact support for assistance.');
+      } else if (errorMessage.toLowerCase().includes('captcha')) {
+        setError('Invalid CAPTCHA. Please try again.');
+        loadCaptcha();
+        setCaptchaText('');
       } else {
         setError(errorMessage);
       }
@@ -258,6 +292,31 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+            {isLogin && (
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-700 dark:text-gray-300">Enter the numbers</label>
+                  <button type="button" onClick={loadCaptcha} className="text-xs text-blue-600 hover:underline">Refresh</button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-md p-2 bg-white/60 dark:bg-gray-800/60" dangerouslySetInnerHTML={{ __html: captchaSvg || '' }} />
+                  <input
+                    id="captcha"
+                    name="captcha"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{5}"
+                    maxLength={5}
+                    required={isLogin}
+                    className="flex-1 appearance-none relative block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white/50 dark:bg-gray-800/60 backdrop-blur-sm"
+                    placeholder="Type numbers"
+                    title="Enter exactly 5 digits"
+                    value={captchaText}
+                    onChange={(e) => setCaptchaText(e.target.value.replace(/[^0-9]/g, ''))}
+                  />
+                </div>
+              </div>
+            )}
             {showOtpField && (
               <div>
                 <label htmlFor="otp" className="sr-only">OTP</label>

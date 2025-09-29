@@ -14,7 +14,7 @@ type AuthContextType = {
     error: any;
     data: any;
   }>;
-  signIn: (email: string, password: string, otp?: string) => Promise<{
+  signIn: (email: string, password: string, otp?: string, captchaText?: string, captchaToken?: string) => Promise<{
     error: any;
     data: any;
   }>;
@@ -56,12 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { data: null, error: null };
   };
 
-  const signIn = async (email: string, password: string, otp?: string) => {
+  const signIn = async (email: string, password: string, otp?: string, captchaText?: string, captchaToken?: string) => {
     try {
       const resp = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, otp })
+        body: JSON.stringify({ email, password, otp, captcha: captchaText, captchaToken })
       });
       const result = await resp.json();
       if (!resp.ok) {

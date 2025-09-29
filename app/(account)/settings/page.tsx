@@ -340,7 +340,7 @@ export default function SettingsPage() {
                       {/* Account */}
                       <h3 className="text-xl font-semibold text-gray-900">Security</h3>
                       <div className="p-4 border border-gray-200 rounded-lg bg-white space-y-4">
-                        {/* Two-Factor Authentication Toggle */}
+                        {/* Two-Factor Authentication Toggle (admins included) */}
                         <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
                           <div className="flex-1">
                             <h4 className="text-lg font-medium text-gray-900">Two-Factor Authentication</h4>

@@ -12,14 +12,14 @@ export async function POST(request: Request) {
   try {
     const admin = await requireAdmin();
     const body = await request.json();
-    const { name, mobile, gender, state, two_factor_enabled } = body || {};
+    const { name, mobile, gender, state } = body || {};
 
     const updates: Record<string, string | null | boolean> = {};
     if (typeof name === 'string') updates.name = name;
     if (typeof mobile === 'string' || mobile === null) updates.mobile = mobile ?? null;
     if (typeof gender === 'string' || gender === null) updates.gender = gender ?? null;
     if (typeof state === 'string' || state === null) updates.state = state ?? null;
-    if (typeof two_factor_enabled === 'boolean') updates.two_factor_enabled = two_factor_enabled;
+    // two_factor_enabled is no longer configurable from admin panel
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       .from('users')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', admin!.id)
-      .select('id, email, name, mobile, gender, state, role, is_banned, two_factor_enabled')
+      .select('id, email, name, mobile, gender, state, role, is_banned')
       .single();
 
     if (error) {
