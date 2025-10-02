@@ -30,6 +30,7 @@ export default function Navbar() {
   // Navigation items
   const baseNavItems = [
     { key: 'home', href: '/home' },
+    { key: 'notice', href: '/notice' },
     { key: 'about', href: '/about' },
     { key: 'contact', href: '/contact' },
     { key: 'settings', href: '/settings' },
@@ -162,6 +163,13 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('mobileHome')}
+              </Link>
+              <Link
+                href="/notice"
+                className="flex items-center px-5 py-3.5 rounded-xl text-lg font-semibold text-white hover:bg-white/10 transition-colors border-l-4 border-transparent hover:border-yellow-400"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('notice')}
               </Link>
               <Link
                 href="/about"
