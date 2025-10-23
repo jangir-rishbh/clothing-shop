@@ -1,8 +1,7 @@
 import { ReactNode } from 'react';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUserFromCookie } from '@/lib/auth';
-import Footer from '@components/Footer';
+import AdminClientWrapper from './admin-client-wrapper';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await getCurrentUserFromCookie();
@@ -10,27 +9,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect('/login?redirectedFrom=/admin/dashboard');
   }
 
-  return (
-    <>
-      <div className="min-h-screen grid grid-cols-[240px_1fr]">
-        <aside className="bg-gray-900 text-white p-6 space-y-4">
-          <h1 className="text-xl font-semibold">Admin Panel</h1>
-          <nav className="space-y-2">
-            <Link className="block hover:underline" href="/admin/dashboard">Dashboard</Link>
-            <Link className="block hover:underline" href="/admin/users">Users</Link>
-            <Link className="block hover:underline" href="/admin/products">Products</Link>
-            
-            <Link className="block hover:underline" href="/admin/massage">massage</Link>
-          </nav>
-        </aside>
-        <main className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div />
-          </div>
-          {children}
-        </main>
-      </div>
-      <Footer />
-    </>
-  );
+  const navItems = [
+    { href: "/admin/dashboard", label: "Dashboard" },
+    { href: "/admin/users", label: "Users" },
+    { href: "/admin/products", label: "Products" },
+    { href: "/admin/massage", label: "Massage" }
+  ];
+
+  return <AdminClientWrapper navItems={navItems}>{children}</AdminClientWrapper>;
 }
