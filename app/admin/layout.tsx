@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <Link className="block hover:underline" href="/admin/dashboard">Dashboard</Link>
             <Link className="block hover:underline" href="/admin/users">Users</Link>
             <Link className="block hover:underline" href="/admin/products">Products</Link>
-            <Link className="block hover:underline" href="/admin/notice">Notice</Link>
+            
             <Link className="block hover:underline" href="/admin/massage">massage</Link>
           </nav>
         </aside>

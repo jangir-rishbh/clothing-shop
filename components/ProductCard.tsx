@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FiShoppingCart, FiEye, FiShare2 } from "react-icons/fi";
+import { FiShoppingCart, FiEye } from "react-icons/fi";
 
 interface ProductCardProps {
   id: string;
@@ -80,12 +80,7 @@ export default function ProductCard({ id, name, price, category }: ProductCardPr
                 >
                   <FiShoppingCart className="w-5 h-5" />
                 </button>
-                <button 
-                  className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-700 hover:bg-pink-100 hover:text-pink-600 transition-colors"
-                  aria-label="Share"
-                >
-                  <FiShare2 className="w-5 h-5" />
-                </button>
+                
               </div>
               <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-colors">
                 View Details
