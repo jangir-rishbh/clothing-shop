@@ -30,7 +30,6 @@ export default function Navbar() {
   // Navigation items
   const baseNavItems = [
     { key: 'home', href: '/home' },
-    
     { key: 'about', href: '/about' },
     { key: 'contact', href: '/contact' },
     { key: 'settings', href: '/settings' },
@@ -282,7 +281,7 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-    </div>
-  </nav>
-);
+      </div>
+    </nav>
+  );
 }

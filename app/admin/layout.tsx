@@ -17,4 +17,5 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   ];
 
   return <AdminClientWrapper navItems={navItems}>{children}</AdminClientWrapper>;
+
 }
