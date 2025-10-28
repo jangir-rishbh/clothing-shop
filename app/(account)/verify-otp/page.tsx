@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function VerifyOtpPage() {
   const router = useRouter();
@@ -234,217 +236,201 @@ export default function VerifyOtpPage() {
     }
   };
 
-  // Handle password submission
-  const handlePasswordSubmit = async () => {
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    await completeSignup(password);
-  };
 
   // Render the component
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
-      <div className="max-w-md w-full space-y-8 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700 dark:text-gray-100">
-        <div>
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100">
-            {verificationMethod === 'email' ? 'Verify Your Email' : 'Verify Your Phone'}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 sm:px-6 lg:px-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+      >
+        <div className="text-center">
+          <h2 className="mt-6 text-2xl font-bold text-gray-900 dark:text-white">
+            {showPasswordForm ? 'Set Your Password' : 'Verify OTP'}
           </h2>
-          <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-300">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             {verificationMethod === 'email' 
-              ? `We've sent a 6-digit verification code to ${email}`
-              : `We've sent a 6-digit verification code to +91${phone}`
-            }
+              ? `Enter the 6-digit code sent to ${email}`
+              : `Enter the 6-digit code sent to +91${phone}`}
           </p>
         </div>
 
         {error && (
           <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-red-800 dark:text-red-300">{error}</p>
-              </div>
-            </div>
+            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
           </div>
         )}
 
         {success && (
           <div className="rounded-md bg-green-50 dark:bg-green-900/30 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800 dark:text-green-300">{success}</p>
-              </div>
-            </div>
+            <p className="text-sm text-green-700 dark:text-green-300">{success}</p>
           </div>
         )}
 
-        {!verificationComplete && (
-          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            <div className="relative">
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        {!verificationComplete && !showPasswordForm ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="otp" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Enter 6-digit OTP
               </label>
-              <input
-                id="otp"
-                type="text"
-                inputMode="numeric"
-                pattern="\d*"
-                maxLength={6}
-                value={otp}
-                onChange={handleOtpChange}
-                onPaste={handlePaste}
-                autoComplete="one-time-code"
-                autoFocus
-                className={`w-full px-4 py-3 border ${
-                  error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
-                } rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-center text-xl tracking-widest font-mono text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 dark:placeholder-gray-400`}
-                placeholder="_ _ _ _ _ _"
-                disabled={loading || showPasswordForm}
-              />
-              {otp.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setOtp('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                  aria-label="Clear OTP"
-                >
-                  ✕
-                </button>
-              )}
+              <div className="mt-1">
+                <input
+                  id="otp"
+                  name="otp"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  required
+                  value={otp}
+                  onChange={handleOtpChange}
+                  onPaste={handlePaste}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="000000"
+                  autoComplete="one-time-code"
+                  autoFocus
+                />
+              </div>
             </div>
 
-            <div className="space-y-4">
+            <div>
               <button
                 type="submit"
-                disabled={loading || otp.length !== 6 || showPasswordForm}
-                className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${
-                  loading || otp.length !== 6 || showPasswordForm
-                    ? 'bg-blue-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
-                }`}
+                disabled={loading || otp.length !== 6}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  loading || otp.length !== 6
+                    ? 'bg-indigo-400 dark:bg-indigo-700 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
               >
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
+            </div>
 
-              <div className="text-center text-sm dark:text-gray-300">
-                <span className="text-gray-600 dark:text-gray-400">Didn&apos;t receive code? </span>
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={resendDisabled || loading || showPasswordForm}
-                  className={`font-medium dark:bg-gray-800/60 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:underline ${
-                    resendDisabled || showPasswordForm
-                      ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                      : 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'
-                  }`}
-                >
-                  {resendDisabled ? `Resend in ${resendCountdown}s` : 'Resend OTP'}
-                </button>
-              </div>
+            <div className="text-center text-sm">
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resendDisabled}
+                className={`font-medium ${
+                  resendDisabled
+                    ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                    : 'text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300'
+                }`}
+              >
+                {resendDisabled ? `Resend OTP in ${resendCountdown}s` : 'Resend OTP'}
+              </button>
             </div>
           </form>
-        )}
-
-        {showPasswordForm && !verificationComplete && (
-          <div className="mt-8 space-y-6">
+        ) : showPasswordForm && !verificationComplete ? (
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (password === confirmPassword) {
+                completeSignup(password);
+              } else {
+                setError('Passwords do not match');
+              }
+            }} 
+            className="space-y-5"
+          >
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                New Password
               </label>
-              <div className="relative">
+              <div className="relative mt-1">
                 <input
                   id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pr-12 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 dark:placeholder-gray-400"
-                  placeholder="Enter password"
-                  required
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white pr-10"
+                  placeholder="••••••••"
                   minLength={6}
-                  autoComplete="new-password"
-                  disabled={loading}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
                 </button>
               </div>
             </div>
-            
+
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Confirm Password
               </label>
-              <div className="relative">
+              <div className="relative mt-1">
                 <input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pr-12 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800/60 dark:placeholder-gray-400"
-                  placeholder="Confirm password"
-                  required
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white pr-10"
+                  placeholder="••••••••"
                   minLength={6}
-                  autoComplete="new-password"
-                  disabled={loading}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
                 </button>
               </div>
             </div>
-            
-            <button
-              type="button"
-              onClick={handlePasswordSubmit}
-              disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${
-                loading
-                  ? 'bg-purple-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-              }`}
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading || !password || !confirmPassword}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  loading || !password || !confirmPassword
+                    ? 'bg-indigo-400 dark:bg-indigo-700 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </button>
+            </div>
+          </form>
+        ) : null}
+
+        {verificationComplete && (
+          <div className="mt-4 text-center">
+            <p className="text-green-600 dark:text-green-400">
+              Account created successfully! Redirecting to login...
+            </p>
           </div>
         )}
 
-        <div className="text-center text-sm mt-4">
-          <p className="text-gray-600 dark:text-gray-300">
-            Wrong email?{' '}
-            <Link 
-              href="/signup" 
-              className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:underline"
-            >
-              Go back
-            </Link>
-          </p>
+        <div className="mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
+          <Link
+            href="/login"
+            className="w-full flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back to login
+          </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

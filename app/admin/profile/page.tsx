@@ -1,168 +1,100 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminProfilePage() {
+  const { session, loading } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: '',
-    mobile: '',
-    gender: '',
-    state: '',
-  });
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const resp = await fetch('/api/me', { cache: 'no-store' });
-        const data = await resp.json();
-        if (!data?.user) {
-          router.push('/login?redirectedFrom=/admin/profile');
-          return;
-        }
-        if (data.user.role !== 'admin') {
-          router.push('/login?redirectedFrom=/admin/profile');
-          return;
-        }
-        setForm({
-          name: data.user.name || '',
-          mobile: data.user.mobile || '',
-          gender: data.user.gender || '',
-          state: data.user.state || '',
-        });
-      } catch (e) {
-        console.error(e);
-        setError('Failed to load profile');
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, [router]);
-
-  const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const resp = await fetch('/api/admin/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          mobile: form.mobile.trim() || null,
-          gender: form.gender.trim() || null,
-          state: form.state.trim() || null,
-        }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) {
-        throw new Error(data?.error || 'Update failed');
-      }
-      setSuccess('Profile updated successfully');
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to update';
-      setError(message);
-    } finally {
-      setSaving(false);
+    if (!loading && (!session || session.role !== 'admin')) {
+      router.push('/login');
     }
-  };
+  }, [session, loading, router]);
 
-  if (loading) {
+  if (loading || !session) {
     return (
-      <div className="p-6">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl">
-      <h2 className="text-2xl font-bold mb-4">My Profile</h2>
-
-      {error && (
-        <div className="mb-4 rounded bg-red-50 text-red-700 p-3">{error}</div>
-      )}
-      {success && (
-        <div className="mb-4 rounded bg-green-50 text-green-700 p-3">{success}</div>
-      )}
-
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={onChange}
-            className="w-full border rounded px-3 py-2"
-            placeholder="Your name"
-            required
-          />
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-gray-900">Admin Profile</h1>
+          <p className="mt-2 text-sm text-gray-600">Administrator account details and information</p>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
-          <input
-            type="tel"
-            name="mobile"
-            value={form.mobile}
-            onChange={onChange}
-            className="w-full border rounded px-3 py-2"
-            placeholder="Phone number"
-          />
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6 bg-gray-50">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Admin Information</h3>
+          </div>
+          <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+            <dl className="sm:divide-y sm:divide-gray-200">
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Full name</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{session.name || 'Admin'}</dd>
+              </div>
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Email address</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{session.email}</dd>
+              </div>
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Role</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    {session.role || 'Admin'}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-          <select
-            name="gender"
-            value={form.gender}
-            onChange={onChange}
-            className="w-full border rounded px-3 py-2"
-          >
-            <option value="">Select</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+        <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6 bg-gray-50">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Admin Actions</h3>
+          </div>
+          <div className="px-4 py-5 sm:p-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Link
+                href="/admin/dashboard"
+                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <h4 className="font-medium text-gray-900">Dashboard</h4>
+                <p className="mt-1 text-sm text-gray-500">View admin dashboard and analytics</p>
+              </Link>
+              <Link
+                href="/admin/users"
+                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <h4 className="font-medium text-gray-900">Manage Users</h4>
+                <p className="mt-1 text-sm text-gray-500">View and manage user accounts</p>
+              </Link>
+              <Link
+                href="/admin/products"
+                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <h4 className="font-medium text-gray-900">Products</h4>
+                <p className="mt-1 text-sm text-gray-500">Manage product catalog</p>
+              </Link>
+              <Link
+                href="/settings"
+                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <h4 className="font-medium text-gray-900">Settings</h4>
+                <p className="mt-1 text-sm text-gray-500">Account and application settings</p>
+              </Link>
+            </div>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-          <input
-            type="text"
-            name="state"
-            value={form.state}
-            onChange={onChange}
-            className="w-full border rounded px-3 py-2"
-            placeholder="Your state"
-          />
-        </div>
-
-        {/* Security settings removed: Two-Factor option hidden in admin panel */}
-
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className={`px-4 py-2 rounded text-white ${saving ? 'bg-gray-400' : 'bg-purple-600 hover:bg-purple-700'}`}
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import Footer from "@components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import MarqueeBanner from "@components/MarqueeBanner";
 import { I18nProvider } from "@/context/I18nContext";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,17 +47,19 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
-        <I18nProvider>
-          <AuthProvider>
-            <MarqueeBanner />
-            <Navbar />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
-          </AuthProvider>
-        </I18nProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <I18nProvider>
+            <AuthProvider>
+              <MarqueeBanner />
+              <Navbar />
+              <main className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+            </AuthProvider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

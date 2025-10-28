@@ -87,20 +87,24 @@ export default function AdminUsersPage() {
                   <td className="px-4 py-2 text-gray-900 dark:text-gray-100">{u.email}</td>
                   <td className="px-4 py-2 text-gray-900 dark:text-gray-100">{u.name || "-"}</td>
                   <td className="px-4 py-2 text-gray-900 dark:text-gray-100">
-                    <span className={`inline-block px-2 py-1 text-xs rounded font-medium ${
+                    <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold ${
                       u.role === 'admin'
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        ? 'bg-purple-600 text-white dark:bg-purple-700 dark:text-white'
+                        : 'bg-blue-600 text-white dark:bg-blue-700 dark:text-white'
                     }`}>
-                      {u.role}
+                      {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
                     </span>
                   </td>
                   <td className="px-4 py-2 text-gray-900 dark:text-gray-100">{u.mobile || "-"}</td>
                   <td className="px-4 py-2 text-gray-900 dark:text-gray-100">
                     {u.is_banned ? (
-                      <span className="inline-block px-2 py-1 text-xs rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">Banned</span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-red-600 text-white dark:bg-red-700">
+                        Banned
+                      </span>
                     ) : (
-                      <span className="inline-block px-2 py-1 text-xs rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Active</span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold bg-green-600 text-white dark:bg-green-700">
+                        Active
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-2 text-gray-900 dark:text-gray-100">

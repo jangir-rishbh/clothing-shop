@@ -17,9 +17,9 @@ export default function AdminClientLayout({ children, navItems }: AdminClientLay
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Sidebar */}
-      <div className={`bg-indigo-800 text-white ${isSidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 ease-in-out`}>
+      <div className={`bg-indigo-800 dark:bg-gray-800 text-white ${isSidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 ease-in-out`}>
         <div className="p-4 flex justify-between items-center">
           <h2 className={`font-bold text-xl ${isSidebarOpen ? 'block' : 'hidden'}`}>Admin Panel</h2>
           <button 
@@ -43,8 +43,8 @@ export default function AdminClientLayout({ children, navItems }: AdminClientLay
                   href={item.href}
                   className={`flex items-center px-4 py-3 ${
                     pathname === item.href 
-                      ? 'bg-indigo-900 border-l-4 border-white' 
-                      : 'hover:bg-indigo-700'
+                      ? 'bg-indigo-900 dark:bg-gray-700 border-l-4 border-white' 
+                      : 'hover:bg-indigo-700 dark:hover:bg-gray-700'
                   }`}
                 >
                   <span className={isSidebarOpen ? 'block' : 'hidden'}>{item.label}</span>
@@ -56,8 +56,8 @@ export default function AdminClientLayout({ children, navItems }: AdminClientLay
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto">
-        <main className="p-6">
+      <div className="flex-1 overflow-auto bg-white dark:bg-gray-900">
+        <main className="p-6 min-h-full">
           {children}
         </main>
       </div>

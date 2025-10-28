@@ -114,8 +114,8 @@ export default function AdminMassagePage() {
 				<div className="p-4">Loading messages...</div>
 			) : (
 				<div className="overflow-x-auto border rounded">
-					<table className="min-w-full divide-y divide-gray-200 text-gray-900">
-						<thead className="bg-gray-50">
+					<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-gray-900 dark:text-gray-100">
+						<thead className="bg-gray-50 dark:bg-gray-800">
 							<tr>
 								<th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Name</th>
 								<th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Email</th>
@@ -129,20 +129,20 @@ export default function AdminMassagePage() {
 						<tbody className="bg-white divide-y divide-gray-200">
 							{filtered.map(m => (
 								<Fragment key={m.id}>
-									<tr className={replyingTo === m.id ? 'bg-blue-50' : ''}>
+									<tr className={replyingTo === m.id ? 'bg-blue-50 dark:bg-blue-900/30' : 'dark:bg-gray-900'}>
 										<td className="px-4 py-2 text-gray-900">{m.first_name} {m.last_name}</td>
 										<td className="px-4 py-2 text-gray-900">{m.email}</td>
 										<td className="px-4 py-2 text-gray-900">{m.phone || '-'}</td>
 										<td className="px-4 py-2 text-gray-900 whitespace-pre-wrap max-w-xl">
 											<div className="mb-2">{m.message}</div>
 											{m.replies && m.replies.length > 0 && (
-												<div className="mt-2 p-2 bg-green-50 border-l-4 border-green-400">
-													<div className="text-sm font-medium text-green-800 mb-1">Admin Replies:</div>
+												<div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-600">
+													<div className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Admin Replies:</div>
 													{m.replies.map((reply, index) => (
-														<div key={reply.id} className="text-sm text-green-700 mb-1">
+														<div key={reply.id} className="text-sm text-green-700 dark:text-green-200 mb-1">
 															<div className="font-medium">Reply {index + 1}:</div>
 															<div className="whitespace-pre-wrap">{reply.admin_reply}</div>
-															<div className="text-xs text-green-600 mt-1">
+															<div className="text-xs text-green-600 dark:text-green-400 mt-1">
 																{new Date(reply.created_at).toLocaleString()}
 															</div>
 														</div>
@@ -151,12 +151,12 @@ export default function AdminMassagePage() {
 											)}
 										</td>
 										<td className="px-4 py-2 text-gray-900">
-											<span className={`px-2 py-1 rounded-full text-xs font-medium ${
-												m.status === 'new' ? 'bg-blue-100 text-blue-800' :
-												m.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-												m.status === 'resolved' ? 'bg-green-100 text-green-800' :
-												'bg-gray-100 text-gray-800'
-											}`}>
+											<span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold ${
+                      m.status === 'new' ? 'bg-blue-600 text-white dark:bg-blue-700' :
+                      m.status === 'in_progress' ? 'bg-yellow-600 text-white dark:bg-yellow-700' :
+                      m.status === 'resolved' ? 'bg-green-600 text-white dark:bg-green-700' :
+                      'bg-gray-600 text-white dark:bg-gray-700'
+                    }`}>
 												{m.status || 'new'}
 											</span>
 										</td>
