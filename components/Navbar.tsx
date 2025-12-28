@@ -6,6 +6,32 @@ import { useAuth } from "@/context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "@/context/I18nContext";
 
+// Sign out function
+const handleSignOut = async () => {
+  try {
+    // Clear local storage and session storage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth');
+      sessionStorage.clear();
+      
+      // Clear all cookies
+      document.cookie.split(';').forEach(c => {
+        document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+      });
+      
+      // Call the signout API
+      await fetch('/api/auth/signout', { method: 'POST' });
+      
+      // Force a full page reload to clear all states
+      window.location.href = '/login';
+    }
+  } catch (error) {
+    console.error('Error during logout:', error);
+    // Still redirect to login even if there was an error
+    window.location.href = '/login';
+  }
+};
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -97,10 +123,10 @@ export default function Navbar() {
                 <div className="relative ml-4">
                   <button 
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className={`flex items-center text-sm ${isAdmin ? 'rounded-md' : 'rounded-full'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white`}
+                    className={`flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-600 focus:ring-white`}
                   >
                     <span className="sr-only">{t('openUserMenu')}</span>
-                    <div className={`h-8 w-8 ${isAdmin ? 'rounded-md' : 'rounded-full'} bg-white flex items-center justify-center text-purple-600 font-semibold`}>
+                    <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-purple-600 font-semibold">
                       {(session.name?.[0] || session.email?.[0] || 'U').toUpperCase()}
                     </div>
                   </button>
@@ -116,7 +142,6 @@ export default function Navbar() {
                           {t('yourProfile')}
                         </Link>
                       )}
-                      
                     </div>
                   )}
                 </div>
