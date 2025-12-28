@@ -51,7 +51,6 @@ export default function Footer() {
               <span className="text-white"> Cloth Store</span>
             </span>. All rights reserved.
           </p>
-          <p className="text-gray-400 mt-2">made by rishbh jangir</p>
         </div>
       </div>
     </footer>
