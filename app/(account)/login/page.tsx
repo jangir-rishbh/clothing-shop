@@ -3,35 +3,23 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import Link from 'next/link';
 
 type FormData = {
   email: string;
-  password: string;
-  name: string;
-  otp: string;
 };
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { session, signIn } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
+  const { session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     email: '',
-    password: '',
-    name: '',
-    otp: ''
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showOtpField, setShowOtpField] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [captchaSvg, setCaptchaSvg] = useState<string | null>(null);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaText, setCaptchaText] = useState<string>('');
+  const [emailChecked, setEmailChecked] = useState(false);
+  const [emailExists, setEmailExists] = useState<boolean | null>(null);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -42,6 +30,8 @@ export default function LoginPage() {
 
   // Check for redirect URL
   const redirectTo = searchParams.get('redirectedFrom') || '/home';
+
+  const reset = searchParams.get('reset') === '1';
   
   // Check if user was redirected due to being banned
   useEffect(() => {
@@ -50,22 +40,16 @@ export default function LoginPage() {
     }
   }, [searchParams]);
 
-  // Load CAPTCHA on mount and when needed
-  const loadCaptcha = async () => {
-    try {
-      const res = await fetch('/api/captcha', { cache: 'no-store' });
-      const data = await res.json();
-      setCaptchaSvg(data.svg);
-      setCaptchaToken(data.token);
-      setCaptchaText('');
-    } catch (e) {
-      console.error('Failed to load captcha', e);
-    }
-  };
-
+  // Allow user to change email
   useEffect(() => {
-    loadCaptcha();
-  }, []);
+    if (reset) {
+      setEmailChecked(false);
+      setEmailExists(null);
+      setError(null);
+      setSuccess(null);
+      setFormData({ email: '' });
+    }
+  }, [reset]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -75,118 +59,69 @@ export default function LoginPage() {
     }));
   };
 
-  // Function removed as it was unused
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCheckEmail = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setEmailChecked(false);
+    setEmailExists(null);
 
     try {
-      if (isLogin) {
-        // Require captcha for login
-        if (!captchaText || !captchaToken) {
-          throw new Error('Please solve the CAPTCHA');
-        }
-        const { error, data } = await signIn(
-          formData.email,
-          formData.password,
-          showOtpField ? formData.otp : undefined,
-          captchaText,
-          captchaToken
-        );
-        if (error) {
-          throw new Error(typeof error === 'string' ? error : 'Invalid email or password');
-        }
-        // If server requires OTP (admin flow), show OTP field and stop here
-        if (data?.requiresOtp) {
-          setOtpSent(true);
-          setShowOtpField(true);
-          setSuccess('OTP sent to your email. Please enter it to continue.');
-          return;
-        }
-        const role = data?.user?.role || 'user';
-        if (role === 'admin') router.push('/admin/dashboard'); else router.push(redirectTo);
-      } else {
-        // For signup, first validate name and email
-        if (!formData.name.trim()) {
-          throw new Error('Name is required');
-        }
-        if (!formData.email) {
-          throw new Error('Email is required');
-        }
-        
-        // Send OTP without password
-        const response = await fetch('/api/send-otp', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            email: formData.email,
-            name: formData.name.trim(),
-            // Don't send password in initial OTP request
-            purpose: 'signup_verification'
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to send OTP');
-        }
-
-        // Store user data in session storage for after verification
-        const userData = {
-          email: formData.email,
-          name: formData.name.trim(),
-        };
-        sessionStorage.setItem('pendingUser', JSON.stringify(userData));
-
-        // Redirect to verify-otp page with email as query param
-        router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}&type=signup`);
+      if (!formData.email) {
+        throw new Error('Email is required');
       }
-    } catch (error: unknown) {
-      console.error('Authentication error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      
-      if (errorMessage.includes('Invalid login credentials')) {
-        setError('Invalid email or password');
-      } else if (errorMessage.includes('Email not confirmed')) {
-        setError('Please verify your email before logging in');
-      } else if (errorMessage.includes('already registered')) {
-        setError('This email is already registered. Please log in instead.');
-        setIsLogin(true);
-      } else if (errorMessage.includes('banned')) {
+
+      const res = await fetch('/api/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to check email');
+      }
+
+      if (data?.banned) {
+        setEmailChecked(true);
+        setEmailExists(true);
         setError('Your account has been banned. Please contact support for assistance.');
-      } else if (errorMessage.toLowerCase().includes('captcha')) {
-        setError('Invalid CAPTCHA. Please try again.');
-        loadCaptcha();
-        setCaptchaText('');
-      } else {
-        setError(errorMessage);
+        return;
       }
+
+      if (!data?.exists) {
+        router.push(`/signup?email=${encodeURIComponent(formData.email)}`);
+        return;
+      }
+
+      setEmailChecked(true);
+      setEmailExists(true);
+      setSuccess('Account found. Choose a login method.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePasswordRoute = () => {
+    router.push(`/login-password?email=${encodeURIComponent(formData.email)}&redirectedFrom=${encodeURIComponent(redirectTo)}`);
+  };
+
+  const handleOtpRoute = () => {
+    router.push(`/login-otp?email=${encodeURIComponent(formData.email)}&redirectedFrom=${encodeURIComponent(redirectTo)}`);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
-      <div className={`max-w-md w-full space-y-8 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700 dark:text-gray-100 transform transition-all duration-500 ${isLogin ? 'hover:shadow-2xl' : 'hover:shadow-3xl'}`}>
+      <div className="max-w-md w-full space-y-8 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm p-10 rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700 dark:text-gray-100 transform transition-all duration-500 hover:shadow-2xl">
         <div>
           <h2 className="text-center text-4xl font-bold bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent">
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
+            Sign in / Sign up
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
-            Don&apos;t have an account?{' '}
-            <Link 
-              href="/signup"
-              className="font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 focus:outline-none"
-            >
-              Sign up
-            </Link>
+            Enter your email to continue
           </p>
         </div>
 
@@ -220,148 +155,79 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!emailChecked) handleCheckEmail();
+          }}
+          className="mt-8 space-y-6"
+        >
           <input type="hidden" name="remember" value="true" />
           <div className="rounded-md shadow-sm -space-y-px">
-            {!isLogin && (
+            {!emailChecked && (
               <div>
-                <label htmlFor="name" className="sr-only">Full Name</label>
+                <label htmlFor="email-address" className="sr-only">Email address</label>
                 <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required={!isLogin}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-t-md focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 dark:bg-gray-800/60 bg-white/50 backdrop-blur-sm focus:z-10 sm:text-sm"
-                  placeholder="Full Name"
-                  value={formData.name}
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="appearance-none relative block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white/50 dark:bg-gray-800/60 backdrop-blur-sm mb-4"
+                  placeholder="Email address"
+                  value={formData.email}
                   onChange={handleChange}
-                  disabled={otpSent}
+                  disabled={loading}
                 />
               </div>
             )}
-            <div>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white/50 dark:bg-gray-800/60 backdrop-blur-sm mb-4"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={otpSent}
-              />
-            </div>
-            <div>
-              <div className="relative">
-                <label htmlFor="password" className="sr-only">Password</label>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete={isLogin ? 'current-password' : 'new-password'}
-                  required={isLogin}
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white/50 dark:bg-gray-800/60 backdrop-blur-sm pr-10"
-                  placeholder={isLogin ? "Password" : "Create a password"}
-                  value={formData.password}
-                  onChange={handleChange}
-                  disabled={!isLogin && !otpSent}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowPassword(!showPassword);
-                  }}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-            {isLogin && (
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm text-gray-700 dark:text-gray-300">Enter the numbers</label>
-                  <button type="button" onClick={loadCaptcha} className="text-xs text-blue-600 hover:underline">Refresh</button>
+
+            {emailChecked && emailExists === true && (
+              <div className="mb-4">
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    onClick={handlePasswordRoute}
+                    disabled={loading}
+                    className="w-full py-3 px-4 rounded-lg font-semibold border-0 transition-all bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    Login with Password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleOtpRoute}
+                    disabled={loading}
+                    className="w-full py-3 px-4 rounded-lg font-semibold border-0 transition-all bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    Login with OTP
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/login?reset=1')}
+                    className="w-full py-2 text-sm text-gray-700 dark:text-gray-300 hover:underline"
+                  >
+                    Use a different email
+                  </button>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-md p-2 bg-white/60 dark:bg-gray-800/60" dangerouslySetInnerHTML={{ __html: captchaSvg || '' }} />
-                  <input
-                    id="captcha"
-                    name="captcha"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]{5}"
-                    maxLength={5}
-                    required={isLogin}
-                    className="flex-1 appearance-none relative block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white/50 dark:bg-gray-800/60 backdrop-blur-sm"
-                    placeholder="Type numbers"
-                    title="Enter exactly 5 digits"
-                    value={captchaText}
-                    onChange={(e) => setCaptchaText(e.target.value.replace(/[^0-9]/g, ''))}
-                  />
-                </div>
-              </div>
-            )}
-            {showOtpField && (
-              <div>
-                <label htmlFor="otp" className="sr-only">OTP</label>
-                <input
-                  id="otp"
-                  name="otp"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="\d{6}"
-                  required={showOtpField}
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white/50 dark:bg-gray-800/60 backdrop-blur-sm"
-                  placeholder="Enter 6-digit OTP"
-                  value={formData.otp}
-                  onChange={handleChange}
-                />
               </div>
             )}
           </div>
 
-          {isLogin ? (
-            <div className="flex items-center justify-end">
-              <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">
-                  Forgot your password?
-                </Link>
-              </div>
-            </div>
-          ) : !otpSent ? (
-            <p className="text-sm text-gray-600">
-              We&apos;ll send you a verification code to your email.
-            </p>
-          ) : (
-            <p className="text-sm text-gray-600">
-              Enter the 6-digit OTP sent to {formData.email}
-            </p>
-          )}
+          <p className="text-sm text-gray-600">
+            We will check if your email is registered.
+          </p>
 
           <div className="space-y-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className={`group relative w-full flex justify-center py-3 px-4 border-0 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {loading ? 'Processing...' : isLogin ? (showOtpField ? 'Verify & Sign in' : 'Sign in') : (otpSent ? 'Complete Sign Up' : 'Send OTP')}
-            </button>
+            {!emailChecked ? (
+              <button
+                type="button"
+                onClick={handleCheckEmail}
+                disabled={loading}
+                className={`group relative w-full flex justify-center py-3 px-4 border-0 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              >
+                {loading ? 'Checking...' : 'Check Email'}
+              </button>
+            ) : null}
           </div>
         </form>
       </div>

@@ -147,17 +147,11 @@ export default function Navbar() {
                 </div>
                 ) : (
                 <div className="flex items-center space-x-2">
-                  <Link 
-                    href="/login" 
-                    className="px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
-                  >
-                    {t('login')}
-                  </Link>
                   <Link
-                    href="/signup"
+                    href="/login"
                     className="px-4 py-2 bg-white text-purple-600 rounded-md hover:bg-gray-100 transition-colors"
                   >
-                    {t('signup')}
+                    Login/Signup
                   </Link>
                 </div>
               )
@@ -263,14 +257,7 @@ export default function Navbar() {
                       className="block w-full px-4 py-3 text-center text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      {t('login')}
-                    </Link>
-                    <Link
-                      href="/signup"
-                      className="block w-full px-4 py-3 text-center text-base font-medium text-purple-600 bg-white rounded-lg hover:bg-gray-100 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {t('signup')}
+                      Login/Signup
                     </Link>
                   </div>
                 )
