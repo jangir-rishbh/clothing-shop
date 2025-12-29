@@ -15,7 +15,6 @@ export default function LoginOtpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
 
@@ -80,7 +79,8 @@ export default function LoginOtpPage() {
       await refreshSession();
 
       const role = data?.user?.role || 'user';
-      if (role === 'admin') router.push('/admin/dashboard'); else router.push(redirectTo);
+      if (role === 'admin') router.push('/admin/dashboard');
+      else router.push(redirectTo);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(msg);

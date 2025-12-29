@@ -6,4 +6,3 @@ create index if not exists idx_users_two_factor_enabled on public.users (two_fac
 
 -- Add a comment to document the column
 comment on column public.users.two_factor_enabled is 'Indicates whether two-factor authentication (email OTP) is enabled for the user';
-

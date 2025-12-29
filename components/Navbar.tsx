@@ -35,7 +35,7 @@ const handleSignOut = async () => {
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { session, loading } = useAuth();
+  const { session, loading, signOut } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const isAdmin = !loading && session?.role === 'admin';
@@ -52,6 +52,18 @@ export default function Navbar() {
   // No extra display name next to brand; only initials in the circle
 
   // Logout has been moved to Settings page
+
+  // Handle logout using AuthContext
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect even if signOut fails
+      window.location.href = '/login';
+    }
+  };
 
   // Navigation items
   const baseNavItems = [
@@ -142,6 +154,17 @@ export default function Navbar() {
                           {t('yourProfile')}
                         </Link>
                       )}
+
+                      <button
+                        type="button"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          handleLogout();
+                        }}
+                      >
+                        {t('logout')}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -247,6 +270,17 @@ export default function Navbar() {
                           {t('yourProfile')}
                         </Link>
                       )}
+
+                      <button
+                        type="button"
+                        className="block w-full text-left px-4 py-3 rounded-lg text-base font-medium text-white hover:bg-white/10 transition-colors"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          handleLogout();
+                        }}
+                      >
+                        {t('logout')}
+                      </button>
                       
                     </div>
                   </div>

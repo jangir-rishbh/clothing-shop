@@ -13,19 +13,16 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [gender, setGender] = useState<string | null>(null);
   const [userState, setUserState] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const [activeGroup, setActiveGroup] = useState<'profile' | 'security'>('profile');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
 
   useEffect(() => {
     if (session) {
-      setTwoFactorEnabled(session.two_factor_enabled || false);
       setName(session.name || '');
       setMobile(session.mobile || '');
       setGender(session.gender || null);
@@ -101,34 +98,6 @@ export default function SettingsPage() {
     );
   }
 
-  const handleTwoFactorToggle = async () => {
-    setSaving(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const resp = await fetch('/api/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          two_factor_enabled: !twoFactorEnabled,
-        }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) {
-        throw new Error(data?.error || 'Update failed');
-      }
-      setTwoFactorEnabled(!twoFactorEnabled);
-      setSuccess(`Two-factor authentication ${!twoFactorEnabled ? 'enabled' : 'disabled'} successfully`);
-      // Refresh session data to show updated information
-      await refreshSession();
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to update';
-      setError(message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleSaveProfile = async () => {
     setSaving(true);
     setError(null);
@@ -155,30 +124,6 @@ export default function SettingsPage() {
       setError(message);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    const confirmed = window.confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');
-    if (!confirmed) return;
-    setDeleting(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const resp = await fetch('/api/delete-account', { method: 'POST' });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) {
-        throw new Error(data?.error || 'Failed to delete account');
-      }
-      // ensure local storage and context are cleared
-      try { await signOut(); } catch {}
-      // redirect to login (user can create a new account from there)
-      router.push('/login');
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to delete account';
-      setError(message);
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -340,64 +285,6 @@ export default function SettingsPage() {
                       {/* Account */}
                       <h3 className="text-xl font-semibold text-gray-900">Security</h3>
                       <div className="p-4 border border-gray-200 rounded-lg bg-white space-y-4">
-                        {/* Two-Factor Authentication Toggle (admins included) */}
-                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
-                          <div className="flex-1">
-                            <h4 className="text-lg font-medium text-gray-900">Two-Factor Authentication</h4>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Add an extra layer of security to your account with email verification.
-                            </p>
-                            <p className="text-xs text-gray-500 mt-2">
-                              Status: <span className={`font-medium ${twoFactorEnabled ? 'text-green-600' : 'text-red-600'}`}>
-                                {twoFactorEnabled ? 'Enabled' : 'Disabled'}
-                              </span>
-                            </p>
-                          </div>
-                          <div className="ml-4">
-                            <button
-                              onClick={handleTwoFactorToggle}
-                              disabled={saving}
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                                twoFactorEnabled ? 'bg-purple-600' : 'bg-gray-200'
-                              } ${saving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                            >
-                              <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                  twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
-                                }`}
-                              />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Logout */}
-                        <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">{t('logout')}</h4>
-                          <p className="text-sm text-gray-600 mb-4">Sign out of your account on this device.</p>
-                          <div className="flex justify-center">
-                            <button
-                              onClick={handleLogout}
-                              className="px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700"
-                            >
-                              {t('logout')}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Delete Account */}
-                        <div className="p-4 border border-red-200 rounded-lg bg-red-50">
-                          <h4 className="text-lg font-semibold text-red-800 mb-2">Delete Account</h4>
-                          <p className="text-sm text-red-700 mb-4">Permanently delete your account and all associated data.</p>
-                          <div className="flex justify-center">
-                            <button
-                              onClick={handleDeleteAccount}
-                              disabled={deleting}
-                              className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${deleting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                              {deleting ? 'Deleting...' : 'Delete Account'}
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     </>
                   )}
@@ -493,4 +380,3 @@ function NotificationSection() {
     </div>
   );
 }
-
