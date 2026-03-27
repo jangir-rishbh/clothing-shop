@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
 
 // Initialize Supabase admin client
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceKey!, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -188,7 +188,8 @@ export async function POST(request: Request) {
       message: 'Email verified successfully',
       verified: true,
       email: email,
-      otpId: otpData.id
+      otpId: otpData.id,
+      requiresPassword: true  // This is crucial for signup flow
     });
   } catch (error) {
     console.error('Error in verify-otp:', error);

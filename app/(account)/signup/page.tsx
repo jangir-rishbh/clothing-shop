@@ -85,10 +85,6 @@ export default function SignupPage() {
     gender: '',
     state: ''
   });
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
 
   // Check if user is already logged in
@@ -170,17 +166,6 @@ export default function SignupPage() {
       if (!formData.state) {
         throw new Error('Please select your state');
       }
-
-      // Validate password first (password-first flow)
-      if (!password) {
-        throw new Error('Password is required');
-      }
-      if (password.length < 6) {
-        throw new Error('Password must be at least 6 characters long');
-      }
-      if (password !== confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
       
       // Prepare OTP request data
       const otpRequestData = {
@@ -205,16 +190,15 @@ export default function SignupPage() {
         throw new Error(data.error || 'Failed to send verification email');
       }
 
-      // Store user data in session storage for after verification
+      // Store user data in cookie for after verification
       const userData = {
         email: formData.email,
         name: formData.name.trim(),
         mobile: formData.mobile,
         gender: formData.gender,
-        state: formData.state,
-        password: password
+        state: formData.state
       };
-      sessionStorage.setItem('pendingUser', JSON.stringify(userData));
+      document.cookie = `pendingUser=${encodeURIComponent(JSON.stringify(userData))}; path=/; max-age=3600; SameSite=lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
 
       // Redirect to verify-otp page
       router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
@@ -510,87 +494,6 @@ export default function SignupPage() {
             </motion.div>
           </motion.div>
 
-          {/* Password Fields (Password-first flow) */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.45 }}
-            className="rounded-md shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <motion.div
-              className="col-span-1"
-              whileHover={{ scale: 1.01 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-            >
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Create Password
-              </label>
-              <div className="relative">
-                <motion.input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  className="appearance-none relative block w-full pr-12 px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800/60"
-                  placeholder="Enter a secure password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              <motion.p 
-                className="mt-1 text-xs text-gray-500"
-                initial={{ opacity: 0.7 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-              >
-                Minimum 6 characters
-              </motion.p>
-            </motion.div>
-            <motion.div
-              className="col-span-1"
-              whileHover={{ scale: 1.01 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-            >
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <motion.input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  className="appearance-none relative block w-full pr-12 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Re-enter your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  whileFocus={{ scale: 1.01, boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.5)' }}
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -621,7 +524,7 @@ export default function SignupPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  Continue to Verify Email
+                  Send Verification Email
                 </motion.span>
               )}
             </motion.button>

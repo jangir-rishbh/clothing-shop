@@ -84,21 +84,29 @@ export default function VerifyOtpPage() {
         throw new Error('Please enter 6-digit OTP');
       }
 
+      console.log('Sending OTP verification request...');
+
       const res = await fetch('/api/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: otpValue }),
       });
 
+      console.log('OTP verification response status:', res.status);
+      
       const data = await res.json();
+      console.log('OTP verification response data:', data);
+
       if (!res.ok) {
         throw new Error(data?.error || 'Failed to verify OTP');
       }
 
       if (data.requiresPassword) {
+        console.log('Password required, showing password form');
         setShowPasswordForm(true);
         setSuccess('OTP verified! Please set your password to complete account creation.');
       } else {
+        console.log('No password required, completing verification');
         setVerificationComplete(true);
         setSuccess('Email verified successfully!');
         await refreshSession();
@@ -110,6 +118,7 @@ export default function VerifyOtpPage() {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unknown error occurred';
+      console.error('OTP verification error:', msg);
       setError(msg);
     } finally {
       setLoading(false);
@@ -121,27 +130,32 @@ export default function VerifyOtpPage() {
     setError(null);
 
     try {
+      console.log('Starting complete signup with email:', email);
+      
       const res = await fetch('/api/complete-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password: newPassword }),
       });
 
+      console.log('Complete signup response status:', res.status);
+      
       const data = await res.json();
+      console.log('Complete signup response data:', data);
+
       if (!res.ok) {
         throw new Error(data?.error || 'Failed to complete signup');
       }
 
       setVerificationComplete(true);
-      setSuccess('Account created successfully!');
-      await refreshSession();
+      setSuccess('Account created successfully! Redirecting to login...');
+      
       setTimeout(() => {
-        const role = data?.user?.role || 'user';
-        if (role === 'admin') router.push('/admin/dashboard');
-        else router.push(redirectTo);
-      }, 1500);
+        router.push(`/login?email=${encodeURIComponent(email)}`);
+      }, 2000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unknown error occurred';
+      console.error('Complete signup error:', msg);
       setError(msg);
     } finally {
       setLoading(false);
@@ -352,7 +366,7 @@ export default function VerifyOtpPage() {
         {verificationComplete && (
           <div className="mt-4 text-center">
             <p className="text-green-600 dark:text-green-400">
-              Account created successfully! Redirecting to login...
+              Account created successfully! Redirecting to login page...
             </p>
           </div>
         )}
