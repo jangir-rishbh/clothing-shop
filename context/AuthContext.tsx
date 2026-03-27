@@ -20,6 +20,10 @@ type AuthContextType = {
   }>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  updateProfile: (data: { name?: string; mobile?: string; gender?: string; state?: string }) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,6 +109,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateProfile = async (data: { name?: string; mobile?: string; gender?: string; state?: string }) => {
+    try {
+      const resp = await fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await resp.json();
+      
+      if (!resp.ok) {
+        return { success: false, error: result.error || 'Failed to update profile' };
+      }
+      
+      // Update local session with new data
+      if (result.user) {
+        const updatedUser = { ...session, ...result.user };
+        setSession(updatedUser);
+        try { localStorage.setItem('custom_user', JSON.stringify(updatedUser)); } catch {}
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Update profile error:', error);
+      return { success: false, error: 'An error occurred while updating profile' };
+    }
+  };
+
   const value = {
     session,
     loading,
@@ -113,6 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signOut,
     refreshSession,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

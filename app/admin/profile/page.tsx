@@ -84,13 +84,6 @@ export default function AdminProfilePage() {
                 <h4 className="font-medium text-gray-900">Products</h4>
                 <p className="mt-1 text-sm text-gray-500">Manage product catalog</p>
               </Link>
-              <Link
-                href="/settings"
-                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <h4 className="font-medium text-gray-900">Settings</h4>
-                <p className="mt-1 text-sm text-gray-500">Account and application settings</p>
-              </Link>
             </div>
           </div>
         </div>

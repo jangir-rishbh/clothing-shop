@@ -36,16 +36,10 @@ export default function ProfilePage() {
             <h3 className="text-lg leading-6 font-medium text-gray-900">Profile Information</h3>
             <div className="flex space-x-3">
               <Link
-                href="/settings"
+                href="/profile/update"
                 className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
               >
-                Settings
-              </Link>
-              <Link
-                href="/messages"
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              >
-                Messages
+                Update Profile
               </Link>
               {session.role === 'admin' ? (
                 <Link
