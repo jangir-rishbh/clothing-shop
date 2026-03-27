@@ -19,9 +19,6 @@ export default function LoginPasswordPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [captchaSvg, setCaptchaSvg] = useState<string | null>(null);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaText, setCaptchaText] = useState<string>('');
 
   useEffect(() => {
     if (session) router.push('/home');
@@ -31,21 +28,6 @@ export default function LoginPasswordPage() {
     if (!email) router.push('/login');
   }, [email, router]);
 
-  const loadCaptcha = async () => {
-    try {
-      const res = await fetch('/api/captcha', { cache: 'no-store' });
-      const data = await res.json();
-      setCaptchaSvg(data.svg);
-      setCaptchaToken(data.token);
-      setCaptchaText('');
-    } catch (e) {
-      console.error('Failed to load captcha', e);
-    }
-  };
-
-  useEffect(() => {
-    loadCaptcha();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,9 +38,8 @@ export default function LoginPasswordPage() {
     try {
       if (!email) throw new Error('Email is required');
       if (!password) throw new Error('Password is required');
-      if (!captchaText || !captchaToken) throw new Error('Please solve the CAPTCHA');
 
-      const { error, data } = await signIn(email, password, undefined, captchaText, captchaToken);
+      const { error, data } = await signIn(email, password);
       if (error) {
         throw new Error(typeof error === 'string' ? error : 'Invalid email or password');
       }
@@ -76,13 +57,7 @@ export default function LoginPasswordPage() {
     } catch (err: unknown) {
       console.error('Password login error:', err);
       const msg = err instanceof Error ? err.message : 'An unknown error occurred';
-      if (msg.toLowerCase().includes('captcha')) {
-        setError('Invalid CAPTCHA. Please try again.');
-        loadCaptcha();
-        setCaptchaText('');
-      } else {
-        setError(msg);
-      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -150,30 +125,6 @@ export default function LoginPasswordPage() {
               </button>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-700 dark:text-gray-300">Enter the numbers</label>
-                <button type="button" onClick={loadCaptcha} className="text-xs text-blue-600 hover:underline">Refresh</button>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="border border-gray-200 dark:border-gray-700 rounded-md p-2 bg-white/60 dark:bg-gray-800/60" dangerouslySetInnerHTML={{ __html: captchaSvg || '' }} />
-                <input
-                  id="captcha"
-                  name="captcha"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]{5}"
-                  maxLength={5}
-                  required
-                  className="flex-1 appearance-none relative block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 placeholder-gray-400 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 bg-white/50 dark:bg-gray-800/60 backdrop-blur-sm"
-                  placeholder="Type numbers"
-                  title="Enter exactly 5 digits"
-                  value={captchaText}
-                  onChange={(e) => setCaptchaText(e.target.value.replace(/[^0-9]/g, ''))}
-                  disabled={loading}
-                />
-              </div>
-            </div>
           </div>
 
           <button

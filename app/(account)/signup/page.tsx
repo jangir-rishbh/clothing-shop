@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { CSSProperties } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,6 +73,7 @@ type FormData = {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +97,17 @@ export default function SignupPage() {
       router.push('/home');
     }
   }, [session, router]);
+
+  // Pre-fill email from URL parameter if available
+  useEffect(() => {
+    const emailFromUrl = searchParams.get('email');
+    if (emailFromUrl) {
+      setFormData(prev => ({
+        ...prev,
+        email: decodeURIComponent(emailFromUrl)
+      }));
+    }
+  }, [searchParams]);
 
   // Generate bubbles once on mount (client-only)
   useEffect(() => {
@@ -384,7 +396,8 @@ export default function SignupPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                readOnly
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-gray-100 dark:bg-gray-700"
                 placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}

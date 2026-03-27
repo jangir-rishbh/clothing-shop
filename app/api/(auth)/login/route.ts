@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import { signSession } from '@/lib/session';
-import { verifyCaptchaToken } from '@/lib/captcha';
 import { sendOtpEmail } from '@/lib/email';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -18,24 +17,13 @@ function generateSixDigitOtp(): string {
 
 export async function POST(request: Request) {
   try {
-    const { email, password, otp, captcha, captchaToken } = await request.json();
+    const { email, password, otp } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
         { status: 400 }
       );
-    }
-
-    // CAPTCHA required: numeric-only
-    if (!captcha || !captchaToken) {
-      return NextResponse.json({ error: 'Captcha required' }, { status: 400 });
-    }
-    const payload = verifyCaptchaToken(String(captchaToken));
-    const userText = String(captcha).replace(/[^0-9]/g, '');
-    const expected = payload?.code;
-    if (!payload || !expected || userText !== expected) {
-      return NextResponse.json({ error: 'Invalid captcha' }, { status: 400 });
     }
 
     // Find user in custom users table
