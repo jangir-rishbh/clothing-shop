@@ -53,7 +53,7 @@ export default function LoginPasswordPage() {
       await refreshSession();
 
       const role = data?.user?.role || 'user';
-      if (role === 'admin') router.push('/admin/dashboard'); else router.push(redirectTo);
+      if (role === 'admin') router.push('/admin/welcome'); else router.push(redirectTo);
     } catch (err: unknown) {
       console.error('Password login error:', err);
       const msg = err instanceof Error ? err.message : 'An unknown error occurred';

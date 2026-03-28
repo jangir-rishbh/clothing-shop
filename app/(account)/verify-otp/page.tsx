@@ -112,7 +112,7 @@ export default function VerifyOtpPage() {
         await refreshSession();
         setTimeout(() => {
           const role = data?.user?.role || 'user';
-          if (role === 'admin') router.push('/admin/dashboard');
+          if (role === 'admin') router.push('/admin/welcome');
           else router.push(redirectTo);
         }, 1500);
       }
