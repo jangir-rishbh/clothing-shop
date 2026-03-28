@@ -54,6 +54,7 @@ export default function AdminUpdateProfilePage() {
       const resp = await fetch('/api/admin/update-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData)
       });
       

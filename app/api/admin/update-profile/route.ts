@@ -10,7 +10,13 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: Request) {
   try {
+    console.log('Admin update-profile called');
+    
+    const cookie = request.headers.get('cookie') || '';
+    console.log('Cookie header:', cookie);
+    
     const admin = await requireAdmin();
+    console.log('Admin user:', admin);
     const body = await request.json();
     const { name, mobile, gender, state } = body || {};
 

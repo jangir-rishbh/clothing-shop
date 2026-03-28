@@ -1,19 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { getCurrentUserFromCookie } from '@/lib/auth';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 
 export async function POST(request: NextRequest) {
   try {
     const { name, mobile, gender, state } = await request.json();
 
-    // Get current user from session cookie
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Get current user from custom session cookie
+    const user = await getCurrentUserFromCookie();
     
-    if (sessionError || !session?.user) {
+    if (!user) {
       return NextResponse.json({ error: 'No active session found' }, { status: 401 });
     }
 
     // Update user profile in custom users table
-    const { data: updatedUser, error: updateError } = await supabase
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
       .from('users')
       .update({
         name: name || undefined,
@@ -22,7 +29,7 @@ export async function POST(request: NextRequest) {
         state: state || undefined,
         updated_at: new Date().toISOString()
       })
-      .eq('email', session.user.email)
+      .eq('email', user.email)
       .select()
       .single();
 
