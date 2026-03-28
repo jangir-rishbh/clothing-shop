@@ -30,7 +30,7 @@ export default function AdminDashboardPage() {
   const stats = [
     { 
       title: 'Total Revenue', 
-      value: '$124,563', 
+      value: '₹1,04,563', 
       change: '+12.5%', 
       trend: 'up',
       icon: <DollarSign className="h-6 w-6" />,
@@ -71,19 +71,19 @@ export default function AdminDashboardPage() {
   ];
 
   const recentOrders = [
-    { id: '#10234', customer: 'Sarah Johnson', amount: '$89.99', status: 'completed', items: 3, time: '2 min ago' },
-    { id: '#10233', customer: 'Mike Chen', amount: '$156.00', status: 'processing', items: 5, time: '5 min ago' },
-    { id: '#10232', customer: 'Emma Davis', amount: '$45.50', status: 'pending', items: 2, time: '12 min ago' },
-    { id: '#10231', customer: 'Alex Wilson', amount: '$234.99', status: 'completed', items: 8, time: '18 min ago' },
-    { id: '#10230', customer: 'Lisa Brown', amount: '$67.25', status: 'processing', items: 4, time: '25 min ago' }
+    { id: '#10234', customer: 'Sarah Johnson', amount: '₹7,499', status: 'completed', items: 3, time: '2 min ago' },
+    { id: '#10233', customer: 'Mike Chen', amount: '₹13,000', status: 'processing', items: 5, time: '5 min ago' },
+    { id: '#10232', customer: 'Emma Davis', amount: '₹3,799', status: 'pending', items: 2, time: '12 min ago' },
+    { id: '#10231', customer: 'Alex Wilson', amount: '₹19,499', status: 'completed', items: 8, time: '18 min ago' },
+    { id: '#10230', customer: 'Lisa Brown', amount: '₹5,599', status: 'processing', items: 4, time: '25 min ago' }
   ];
 
   const topProducts = [
-    { name: 'Premium T-Shirt', sales: 234, revenue: '$4,680', trend: '+12%', rating: 4.8 },
-    { name: 'Slim Fit Jeans', sales: 189, revenue: '$7,560', trend: '+8%', rating: 4.6 },
-    { name: 'Running Shoes', sales: 156, revenue: '$9,360', trend: '+15%', rating: 4.9 },
-    { name: 'Hoodie Jacket', sales: 143, revenue: '$5,720', trend: '-3%', rating: 4.7 },
-    { name: 'Summer Dress', sales: 128, revenue: '$3,840', trend: '+5%', rating: 4.5 }
+    { name: 'Premium T-Shirt', sales: 234, revenue: '₹3,90,000', trend: '+12%', rating: 4.8 },
+    { name: 'Slim Fit Jeans', sales: 189, revenue: '₹6,30,000', trend: '+8%', rating: 4.6 },
+    { name: 'Running Shoes', sales: 156, revenue: '₹7,80,000', trend: '+15%', rating: 4.9 },
+    { name: 'Hoodie Jacket', sales: 143, revenue: '₹4,76,000', trend: '-3%', rating: 4.7 },
+    { name: 'Summer Dress', sales: 128, revenue: '₹3,20,000', trend: '+5%', rating: 4.5 }
   ];
 
   const getStatusColor = (status: string) => {

@@ -32,8 +32,14 @@ export default function AdminProfilePage() {
         </div>
 
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6 bg-gray-50">
+          <div className="px-4 py-5 sm:px-6 bg-gray-50 flex items-center justify-between">
             <h3 className="text-lg leading-6 font-medium text-gray-900">Admin Information</h3>
+            <Link
+              href="/admin/profile/update"
+              className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+            >
+              Update Profile
+            </Link>
           </div>
           <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
             <dl className="sm:divide-y sm:divide-gray-200">
@@ -46,9 +52,9 @@ export default function AdminProfilePage() {
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{session.email}</dd>
               </div>
               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Role</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Role</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 dark:text-gray-100">
+                  <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200">
                     {session.role || 'Admin'}
                   </span>
                 </dd>

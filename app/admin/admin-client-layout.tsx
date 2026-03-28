@@ -23,9 +23,19 @@ interface AdminClientLayoutProps {
     href: string;
     label: string;
   }[];
+  user: {
+    id: string;
+    email: string;
+    name?: string | null;
+    mobile?: string | null;
+    gender?: string | null;
+    state?: string | null;
+    role: 'admin' | 'user';
+    two_factor_enabled?: boolean;
+  };
 }
 
-export default function AdminClientLayout({ children, navItems }: AdminClientLayoutProps) {
+export default function AdminClientLayout({ children, navItems, user }: AdminClientLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -178,8 +188,8 @@ export default function AdminClientLayout({ children, navItems }: AdminClientLay
               </button>
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Admin User</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">admin@example.com</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name || 'Admin User'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
                   <User className="h-5 w-5 text-white" />

@@ -12,7 +12,7 @@ const galleryItems = [
     category: 'products',
     imageUrl: '/images/gallery/cotton-collection.jpg',
     description: 'Premium quality cotton fabrics for everyday comfort',
-    price: 'Starting from $29.99'
+    price: 'Starting from ₹2,499'
   },
   {
     id: 2,

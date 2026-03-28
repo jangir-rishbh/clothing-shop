@@ -13,9 +13,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     { href: "/admin/dashboard", label: "Dashboard" },
     { href: "/admin/users", label: "Users" },
     { href: "/admin/products", label: "Products" },
-    { href: "/admin/massage", label: "Massage" }
+    { href: "/admin/massage", label: "Massage" },
+    { href: "/admin/profile", label: "Profile" }
   ];
 
-  return <AdminClientWrapper navItems={navItems}>{children}</AdminClientWrapper>;
+  return <AdminClientWrapper navItems={navItems} user={user}>{children}</AdminClientWrapper>;
 
 }

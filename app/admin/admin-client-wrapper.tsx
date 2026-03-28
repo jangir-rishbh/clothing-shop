@@ -13,8 +13,18 @@ interface AdminClientWrapperProps {
     href: string;
     label: string;
   }[];
+  user: {
+    id: string;
+    email: string;
+    name?: string | null;
+    mobile?: string | null;
+    gender?: string | null;
+    state?: string | null;
+    role: 'admin' | 'user';
+    two_factor_enabled?: boolean;
+  };
 }
 
-export default function AdminClientWrapper({ children, navItems }: AdminClientWrapperProps) {
-  return <AdminClientLayout navItems={navItems}>{children}</AdminClientLayout>;
+export default function AdminClientWrapper({ children, navItems, user }: AdminClientWrapperProps) {
+  return <AdminClientLayout navItems={navItems} user={user}>{children}</AdminClientLayout>;
 }
